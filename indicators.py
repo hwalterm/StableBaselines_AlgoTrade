@@ -15,7 +15,10 @@ def run_bollinger(price_df,symbol):
 
     return df['bbpercent'] 
 
-
+def run_SPY_Ratio(price_df,spy_price_series,symbol):
+    ratio = price_df[symbol]/spy_price_series
+    print(ratio)
+    return ratio
 def run_SMA(price_df, symbol):
     #print(symbol)
     df = price_df

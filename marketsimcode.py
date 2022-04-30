@@ -34,16 +34,18 @@ import numpy as np
 import pandas as pd  		  	   		  	  			  		 			     			  	 
 #from util import get_data, plot_data  		  	   		  	  			  		 			     			  	 
 class marketsim(object):	  	   		  	  			  		 			     			  	 
-    def __init__(self, PRICES,symbols):
+    def __init__(self, PRICES,symbols,SPY):
         self.PRICES = PRICES
         self.symbols = symbols
+        self.SPY_PRICES = SPY
 
     def compute_portvals( 		  	   		  	  			  		 			     			  	 
         self,
         orders_df,  		  	   		  	  			  		 			     			  	 
         start_val=100000,	  	   		  	  			  		 			     			  	 
-        commission=9.95,  		  	   		  	  			  		 			     			  	 
-        impact=0.005,  		  	   		  	  			  		 			     			  	 
+        commission=0,  		  	   		  	  			  		 			     			  	 
+        impact=0, 
+        debug = False 		  	   		  	  			  		 			     			  	 
     ):  		  	   		  	  			  		 			     			  	 
         """  		  	   		  	  			  		 			     			  	 
         Computes the portfolio values.  		  	   		  	  			  		 			     			  	 
@@ -76,7 +78,7 @@ class marketsim(object):
    
     
     
-        prices = self.PRICES
+        prices = self.PRICES[symbols]
         #prices.drop('SPY', axis = 'columns', inplace = True)
         prices['cash'] = 1
 
@@ -121,7 +123,7 @@ class marketsim(object):
 
         transactioncosts = np.where(abs(orders) >0, impact_prices + commission, 0)
         #cash change
-        cash_change = (orders * -prices[symbol]) + transactioncosts
+        cash_change = -((orders * prices[symbol]) + transactioncosts)
         TRADES_DF['cash_change'] = cash_change
   
         
@@ -134,18 +136,24 @@ class marketsim(object):
 
         #print(TRADES_DF)
         HOLDINGS_DF['cash'] = HOLDINGS_DF['cash'] + TRADES_DF['cash']
+        if debug:
+            print('HOLDINGS_DF: {}'.format(HOLDINGS_DF))
+            print('TRADES_DF: {}'.format(TRADES_DF))
+
         #print(HOLDINGS_DF)
         
         # print('TRADES_DF: {}'.format(TRADES_DF[['SPY_orders','GOOG_orders','XOM_orders','IBM_orders',
         # 'AAPL_orders','cash']]))
-        # print('TRADES_DF: {}'.format(TRADES_DF))
-        # print('HOLDINGS_DF: {}'.format(HOLDINGS_DF))
+        
+        
         #calculate values
         # print('prices keys: {}'.format(prices.keys()))
         # print('holdings keys: {}'.format(HOLDINGS_DF.keys()))
         #print(prices)
-        VALUES_DF = self.PRICES * HOLDINGS_DF
-        #print('VALUES_DF: {}'.format(VALUES_DF))
+        VALUES_DF = prices * HOLDINGS_DF
+        
+        if debug:
+            print('VALUES_DF: {}'.format(VALUES_DF))
         
         portvals = VALUES_DF.sum(axis = 1)
         #print(portvals)

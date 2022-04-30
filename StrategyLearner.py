@@ -64,8 +64,9 @@ class StrategyLearner(object):
         self.verbose = verbose  		  	   		  	  			  		 			     			  	 
         self.impact = impact  		  	   		  	  			  		 			     			  	 
         self.commission = commission
-        self.learner = QLearner(num_states = 1000, num_actions = 3)  	
-        self.Marketsimulator = marketsimulator	  	  			  		 			     			  			     			  	 
+        self.learner = QLearner(num_states = 10000, num_actions = 3)  	
+        self.Marketsimulator = marketsimulator
+        self.train_time = 30	  	  			  		 			     			  			     			  	 
 
 
     def compute_reward(self, holdings, start_cash =10000):
@@ -90,7 +91,8 @@ class StrategyLearner(object):
     ):  
         syms = [symbol]  		  	   		  	  			  		 			     			  	 
         dates = pd.date_range(sd, ed)  		  	   		  	  			  		 			     			  	 
-        prices_all = self.Marketsimulator.PRICES 	  	   		  	  			  		 			     			  	 
+        prices_all = self.Marketsimulator.PRICES
+        spy_prices = self.Marketsimulator.SPY_PRICES	  	   		  	  			  		 			     			  	 
         prices = prices_all[syms]  # only portfolio symbols  		  	   		  	  			  		 			     			  	 
        	  	   		  	  			  		 			     			  	 
         # if self.verbose:  		  	   		  	  			  		 			     			  	 
@@ -103,9 +105,13 @@ class StrategyLearner(object):
         df['momentum'] = -indicators.run_momentum(prices,symbol=symbol)
         df['stochasticos'] = indicators.run_stochasticos(prices,symbol=symbol)
         df['bollinger'] = indicators.run_bollinger(prices,symbol=symbol)	
+        df['SPY_Ratio'] = indicators.run_SPY_Ratio(prices,spy_price_series=spy_prices,symbol=symbol)
 
-        df.fillna(method = 'bfill', inplace=True)
-        df.fillna(method = 'ffill', inplace =True)
+        df.fillna(method = 'ffill', inplace=True)
+        df.fillna(method = 'bfill', inplace =True)
+        
+        discretize_indicators_SPY = pd.cut(df['SPY_Ratio'],bins = 10,labels=False, retbins=True,)[0]
+        discretize_indicators_SPY = discretize_indicators_SPY.astype(str)
 
         discretize_indicators_sma = pd.cut(df['sma'],bins = 10,labels=False, retbins=True,)[0]
         discretize_indicators_sma = discretize_indicators_sma.astype(str)
@@ -120,7 +126,7 @@ class StrategyLearner(object):
 
         #discrete_indicators = discretize_indicators_sma + (discretize_indicators_stoc) + (discretize_indicators_bol)
         
-        discrete_indicators = discretize_indicators_sma + discretize_indicators_stoc + discretize_indicators_bol
+        discrete_indicators = discretize_indicators_sma + discretize_indicators_stoc + discretize_indicators_bol + discretize_indicators_SPY
         discrete_indicators = discrete_indicators.astype(int)
         df['discrete_indicator'] = discrete_indicators
         #print(discrete_indicators)
@@ -136,7 +142,7 @@ class StrategyLearner(object):
         action_dict = {0:-shares_to_trade
                         ,1: shares_to_trade
                         ,2:0}
-        t_end = time.time() +30
+        t_end = time.time() +self.train_time
 
         while (time.time()< t_end):
             previous_r = r
@@ -161,7 +167,42 @@ class StrategyLearner(object):
                 
 
 
+    def query_for_live_data(self,prices, order_size = 50,symbol = 'AAPL'):
+        shares_to_trade = order_size
+        
 
+        #calculate indicators for prices
+        df = pd.DataFrame()
+        df['sma'] = indicators.run_SMA(prices,symbol=symbol)
+        df['momentum'] = -indicators.run_momentum(prices,symbol=symbol)
+        df['stochasticos'] = indicators.run_stochasticos(prices,symbol=symbol)
+        df['bollinger'] = indicators.run_stochasticos(prices,symbol=symbol)
+        # df['SPY_Ratio'] = indicators.run_SPY_Ratio(prices,spy_price_series=spy_prices,symbol=symbol)
+        
+        # print(df.head(20))
+        df.fillna(method = 'bfill', inplace=True)
+        df.fillna(method = 'ffill', inplace =True)
+
+        # discretize_indicators_SPY = pd.cut(df['SPY_Ratio'],bins = 10,labels=False, retbins=True,)[0]
+        discretize_indicators_SPY = discretize_indicators_SPY.astype(str)
+
+        discretize_indicators_sma = pd.cut(df['sma'],bins = 10,labels=False, retbins=True,)[0]
+        discretize_indicators_sma = discretize_indicators_sma.astype(str)
+        
+
+        discretize_indicators_stoc = pd.cut(df['stochasticos'],bins = 10,labels=False, retbins=True,)[0]
+        discretize_indicators_stoc = discretize_indicators_stoc.astype(str)
+
+        discretize_indicators_bol = pd.cut(df['bollinger'],bins = 10,labels=False, retbins=True,)[0]
+        discretize_indicators_bol = discretize_indicators_sma.astype(str)
+        discrete_indicators = discretize_indicators_sma + discretize_indicators_stoc + discretize_indicators_bol
+        discrete_indicators = discrete_indicators.astype(int)
+        action_dict = {0:-shares_to_trade
+                        ,1: shares_to_trade
+                        ,2:0}
+        df['position'] = discrete_indicators.apply(self.learner.querysetstate)
+        df['position'] = df['position'].map(action_dict)
+        return df['position']
    		  	   		  	  			  		 			     			  	 
   		  	   		  	  			  		 			     			  	 
     # this method should use the existing policy and test it against new data  		  	   		  	  			  		 			     			  	 
@@ -196,9 +237,14 @@ class StrategyLearner(object):
         df['momentum'] = -indicators.run_momentum(prices,symbol=symbol)
         df['stochasticos'] = indicators.run_stochasticos(prices,symbol=symbol)
         df['bollinger'] = indicators.run_stochasticos(prices,symbol=symbol)
+        df['SPY_Ratio'] = indicators.run_SPY_Ratio(prices,spy_price_series=spy_prices,symbol=symbol)
         # print(df.head(20))
-        df.fillna(method = 'bfill', inplace=True)
         df.fillna(method = 'ffill', inplace =True)
+        df.fillna(method = 'bfill', inplace=True)
+
+
+        discretize_indicators_SPY = pd.cut(df['SPY_Ratio'],bins = 10,labels=False, retbins=True,)[0]
+        discretize_indicators_SPY = discretize_indicators_SPY.astype(str)
 
         discretize_indicators_sma = pd.cut(df['sma'],bins = 10,labels=False, retbins=True,)[0]
         discretize_indicators_sma = discretize_indicators_sma.astype(str)
@@ -212,7 +258,7 @@ class StrategyLearner(object):
 
         #discrete_indicators = discretize_indicators_sma + (discretize_indicators_stoc) + (discretize_indicators_bol)
         
-        discrete_indicators = discretize_indicators_sma + discretize_indicators_stoc + discretize_indicators_bol
+        discrete_indicators = discretize_indicators_sma + discretize_indicators_stoc + discretize_indicators_bol + discretize_indicators_SPY
         discrete_indicators = discrete_indicators.astype(int)
         start = time.process_time()
 

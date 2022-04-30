@@ -93,8 +93,6 @@ class QLearner(object):
         """  		  	   		  	  			  		 			     			  	 
         self.s = s
         action = self.Q[self.s].index(max(self.Q[self.s]))
-        if rand.random()  < self.rar:  
-            action = rand.randint(0, self.num_actions - 1)
         
         
         
