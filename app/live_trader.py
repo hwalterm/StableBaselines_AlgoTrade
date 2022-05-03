@@ -52,12 +52,52 @@ class live_trader(object):
             if (len(self.close_prices)< self.count_of_prices_to_retain):
                 self.close_prices.append(bar.close)
             else:
-                index_to_retain = self.count_of_prices_to_retain -1
-                self.close_prices = (self.close_prices[-index_to_retain:])
-                self.close_prices.append(bar.close)
+                #######################################################
+                #Get Q action
+                # print('get_Qaction prices: '.format(self.close_prices))
+                # print(self.close_prices)
+                # current_position = 0
+                # mapped_position = 2
+                # try:
+                #     current_position = int(self.api.get_position(symbol = self.symbol).qty)
+                # except tradeapi.rest.APIError:
+                #     print(tradeapi.rest.APIError)
+                #     current_position = 0
+                # print(current_position)
+                #query the learner to get the prices
+                # if current_position > 0 :
+                #     mapped_position = 1
+                # elif current_position < 0:
+                #     mapped_position =0
+                # index_to_retain = self.count_of_prices_to_retain -1
+                # self.close_prices = (self.close_prices[-index_to_retain:])
+                # self.close_prices.append(bar.close)
+                ####################################
+                #query live data 
+                # print('query for live data')
+        
+                # df =pd.DataFrame()
+                
+                # df[symbol] = prices
+                # df['SPY'] = spy_prices
+                # print(df)
+                # print('prices: {}'.format(prices))
+                # df = self.learner.calculate_discrete_state(symbol,prices_all = df,spy_prices = spy_prices)	
+                # discrete_indicators	= df['discrete_indicator']
+                # print('returned indicators {}'.format(discrete_indicators))	 
+                # action_dict = {0:-shares_to_trade
+                #                 ,1: shares_to_trade
+                #                 ,2:0}
+                # state = int(str(discrete_indicators[-1]) + str(current_position))
+                # print('state: {}'.format(state))
+                # action = self.Qlearner.querysetstate(s = state)
+                # print('action: {}'.format(action))
+                # position = action_dict[action]
+                
+                ####################################
+
                 await self.execute_QAction()
 
-            print(self.close_prices)
             
             #update bars to add new list
             
@@ -94,7 +134,7 @@ class live_trader(object):
         elif current_position < 0:
             mapped_position =0
 
-        target_position = self.learner.query_for_live_data(prices = self.close_prices,
+        target_position = self.query_for_live_data(prices = self.close_prices,
                                                  spy_prices = self.SPY_prices,
                                                  order_size = self.order_size,
                                                  symbol = self.symbol,
