@@ -203,8 +203,17 @@ class StrategyLearner(object):
                 
 
 
-    def query_for_live_data(self,prices,spy_prices, order_size = 50,symbol = 'AAPL'):
+    def query_for_live_data(self,prices,spy_prices, order_size = 50,symbol = 'AAPL',
+                                current_position = 2):
         shares_to_trade = order_size
+
+        #As standard encoding for the Q learner, we use:
+        # 0 to denote a short position
+        # 1 to denote long position
+        # 2 to denote no
+        state = int(str(value) + str(previous_action))
+
+
         
         df =pd.DataFrame()
         df[symbol] = prices
@@ -215,10 +224,13 @@ class StrategyLearner(object):
         action_dict = {0:-shares_to_trade
                         ,1: shares_to_trade
                         ,2:0}
+        state = int(str(discrete_indicators[-1]) + str(current_position))
         
-        df['position'] = discrete_indicators.apply(self.learner.querysetstate)
-        df['position'] = df['position'].map(action_dict)
-        return df['position']
+        action = self.learner.querysetstate(s = state)
+        position = action_dict[action]
+        #df['position'] = discrete_indicators.apply(self.learner.querysetstate)
+        #df['position'] = df['position'].map(action_dict)
+        return position
    		  	   		  	  			  		 			     			  	 
   		  	   		  	  			  		 			     			  	 
     # this method should use the existing policy and test it against new data  		  	   		  	  			  		 			     			  	 

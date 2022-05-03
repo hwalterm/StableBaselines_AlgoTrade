@@ -73,15 +73,22 @@ class live_trader(object):
         print('get_Qaction prices: '.format(self.close_prices))
         print(self.close_prices)
         current_position = 0
+        mapped_position = 2
         try:
             current_position = int(self.api.get_position(symbol = self.symbol).qty)
         except tradeapi.rest.APIError:
             current_position = 0
         #query the learner to get the prices
+        if current_position > 0 :
+            mapped_position = 1
+        elif current_position < 0:
+            mapped_position =0
+
         target_position = self.learner.query_for_live_data(prices = self.close_prices,
                                                  spy_prices = self.SPY_prices,
                                                  order_size = self.order_size,
-                                                 symbol = self.symbol
+                                                 symbol = self.symbol,
+                                                 current_position = mapped_position
                                                  )
         difference_between_target = abs(target_position - current_position)
         #if we are not at our position cancel existing trades and make a trade to achieve desired position
