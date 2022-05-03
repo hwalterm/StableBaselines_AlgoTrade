@@ -4,8 +4,8 @@ import datetime as dt
 import numpy as np
 def run_bollinger(price_df,symbol):
     df = price_df
-    df[symbol+'_SMA'] = df.iloc[:,0].rolling(window=15).mean()
-    df[symbol+'_std'] = (df.iloc[:,0].rolling(window=15).std())*2
+    df[symbol+'_SMA'] = df.iloc[:,0].rolling(window=10).mean()
+    df[symbol+'_std'] = (df.iloc[:,0].rolling(window=10).std())*2
     df['top_band'] = df[symbol+'_SMA'] + df[symbol+'_std']
     df['bottom_band'] = df[symbol+'_SMA'] - df[symbol+'_std']
     df['previous_top'] =df['top_band'].shift(1)
@@ -17,13 +17,12 @@ def run_bollinger(price_df,symbol):
 
 def run_SPY_Ratio(price_df,spy_price_series,symbol):
     ratio = price_df[symbol]/spy_price_series
-    print(ratio)
     return ratio
 def run_SMA(price_df, symbol):
     #print(symbol)
     df = price_df
     #3 day
-    df[symbol+'_14SMA'] = df.iloc[:,0].rolling(window=14).mean()
+    df[symbol+'_14SMA'] = df.iloc[:,0].rolling(window=7).mean()
 
     df['indicator'] = df[symbol]/df[symbol+'_14SMA']
     df['previous_indicator'] = df['indicator']
@@ -52,8 +51,8 @@ def run_momentum(price_df,symbol= 'AAPL',
     return df['momentum']
 def run_stochasticos(price_df,symbol= 'AAPL'):
     df = price_df
-    df['14-High'] = df[symbol].rolling(14).max()
-    df['14-Low'] = df[symbol].rolling(14).min()
+    df['14-High'] = df[symbol].rolling(7).max()
+    df['14-Low'] = df[symbol].rolling(7).min()
     df['K'] = (df[symbol] - df['14-Low'])/(df['14-High']-df['14-Low'])
     return df['K']
 

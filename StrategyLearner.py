@@ -66,7 +66,10 @@ class StrategyLearner(object):
         self.commission = commission
         self.learner = QLearner(num_states = 10000, num_actions = 3)  	
         self.Marketsimulator = marketsimulator
-        self.train_time = 30	  	  			  		 			     			  			     			  	 
+        self.train_time = 60
+        self.SPY_BINS =[] 
+        self.STOC_BINS = []
+        self.BOL_BINS = [] 	  			  		 			     			  			     			  	 
 
 
     def compute_reward(self, holdings, start_cash =10000):
@@ -77,26 +80,16 @@ class StrategyLearner(object):
         df['orders'] = df['position'] - df['previous_position']
         portval = self.Marketsimulator.compute_portvals(orders_df = df['orders'], start_val=start_cash)
         profit = portval[-1]  - start_cash
-        return profit		  	  			  		 			     			  	 
-  		  	   		  
+        return profit
 
-      		  	   		  	  			  		 			     			  	 
-    # this method should create a QLearner, and train it for trading  		  	   		  	  			  		 			     			  	 
-    def add_evidence(  		  	   		  	  			  		 			     			  	 
-        self,  		  	   		  	  			  		 			     			  	 
-        symbol="IBM",  		  	   		  	  			  		 			     			  	 
-        sd=dt.datetime(2008, 1, 1),  		  	   		  	  			  		 			     			  	 
-        ed=dt.datetime(2009, 1, 1),  		  	   		  	  			  		 			     			  	 
-        sv=100000,  		  	   		  	  			  		 			     			  	 
-    ):  
-        syms = [symbol]  		  	   		  	  			  		 			     			  	 
-        dates = pd.date_range(sd, ed)  		  	   		  	  			  		 			     			  	 
-        prices_all = self.Marketsimulator.PRICES
-        spy_prices = self.Marketsimulator.SPY_PRICES	  	   		  	  			  		 			     			  	 
-        prices = prices_all[syms]  # only portfolio symbols  		  	   		  	  			  		 			     			  	 
-       	  	   		  	  			  		 			     			  	 
-        # if self.verbose:  		  	   		  	  			  		 			     			  	 
-        #     print(prices) 
+    def calculate_discrete_state(self,symbol,prices_all,spy_prices,
+                            spy_bins = 10,
+                            sma_bins = 10,
+                            bol_bins = 10,
+                            stoc_bins = 10,):	 
+        syms = [symbol]  		  	   		  	  			  		 			     			  	 	  	   		  	  			  		 			     			  	 
+	  	   		  	  			  		 			     			  	 
+        prices = prices_all[syms]  # only portfolio symbols   
         df = pd.DataFrame()
         df['price'] = prices_all[symbol]
         df['next_price'] = prices_all[symbol].shift(-1)
@@ -110,25 +103,51 @@ class StrategyLearner(object):
         df.fillna(method = 'ffill', inplace=True)
         df.fillna(method = 'bfill', inplace =True)
         
-        discretize_indicators_SPY = pd.cut(df['SPY_Ratio'],bins = 10,labels=False, retbins=True,)[0]
+        discretize_indicators_SPY,SPY_bins = pd.cut(df['SPY_Ratio'],bins = spy_bins,labels=False, retbins=True,)
+        self.SPY_BINS = SPY_bins
         discretize_indicators_SPY = discretize_indicators_SPY.astype(str)
-
-        discretize_indicators_sma = pd.cut(df['sma'],bins = 10,labels=False, retbins=True,)[0]
+        
+        discretize_indicators_sma,sma_bins = pd.cut(df['sma'],bins = sma_bins,labels=False, retbins=True,)
         discretize_indicators_sma = discretize_indicators_sma.astype(str)
         
 
-        discretize_indicators_stoc = pd.cut(df['stochasticos'],bins = 10,labels=False, retbins=True,)[0]
-        discretize_indicators_stoc = discretize_indicators_stoc.astype(str)
+        discretize_indicators_stoc,stoc_bins = pd.cut(df['stochasticos'],bins = stoc_bins,labels=False, retbins=True,)
+        self.STOC_BINS = stoc_bins
+        discretize_indicators_stoc= discretize_indicators_stoc.astype(str)
 
-        discretize_indicators_bol = pd.cut(df['bollinger'],bins = 10,labels=False, retbins=True,)[0]
+        discretize_indicators_bol,bol_bins = pd.cut(df['bollinger'],bins = bol_bins,labels=False, retbins=True,)
+        self.BOL_BINS = bol_bins
         discretize_indicators_bol = discretize_indicators_sma.astype(str) 
 
 
         #discrete_indicators = discretize_indicators_sma + (discretize_indicators_stoc) + (discretize_indicators_bol)
         
-        discrete_indicators = discretize_indicators_sma + discretize_indicators_stoc + discretize_indicators_bol + discretize_indicators_SPY
-        discrete_indicators = discrete_indicators.astype(int)
+        discrete_indicators = discretize_indicators_stoc + discretize_indicators_bol + discretize_indicators_SPY
+        discrete_indicators = discrete_indicators.astype(float).astype(int)
         df['discrete_indicator'] = discrete_indicators
+        return df	  			  		 			     			  	 
+  		  	   		  
+
+      		  	   		  	  			  		 			     			  	 
+    # this method should create a QLearner, and train it for trading  		  	   		  	  			  		 			     			  	 
+    def add_evidence(  		  	   		  	  			  		 			     			  	 
+        self,  		  	   		  	  			  		 			     			  	 
+        symbol="IBM",  		  	   		  	  			  		 			     			  	 
+        sd=dt.datetime(2008, 1, 1),  		  	   		  	  			  		 			     			  	 
+        ed=dt.datetime(2009, 1, 1),  		  	   		  	  			  		 			     			  	 
+        sv=100000,  		  	   		  	  			  		 			     			  	 
+    ):  
+        prices_all = self.Marketsimulator.PRICES
+        spy_prices = self.Marketsimulator.SPY_PRICES		  	   		  	  			  		 			     			  	 
+        df = self.calculate_discrete_state(symbol,
+                prices_all=prices_all,spy_prices=spy_prices)	
+        discrete_indicators	= df['discrete_indicator']
+        discrete_indicators.index.values.astype(float)
+        first_index = discrete_indicators.first_valid_index()
+        index_time_interval = discrete_indicators.first_valid_index()			  		 			     			  	 
+        # if self.verbose:  		  	   		  	  			  		 			     			  	 
+        #     print(prices) 
+    
         #print(discrete_indicators)
         #set initial state
         self.a = self.learner.querysetstate(discrete_indicators[0])
@@ -139,25 +158,41 @@ class StrategyLearner(object):
         
         r= 0
         previous_r = -99999
+
+        #As standard encoding for the Q learner, we use:
+        # 0 to denote a short position
+        # 1 to denote long position
+        # 2 to denote no
         action_dict = {0:-shares_to_trade
                         ,1: shares_to_trade
                         ,2:0}
+        reverse_action_dict = {-shares_to_trade:0,
+                                shares_to_trade:1,
+                                0:2
+        }
         t_end = time.time() +self.train_time
-
+        previous_index = None
         while (time.time()< t_end):
             previous_r = r
         
             for index,value in discrete_indicators.iteritems():
-            
+                if index >first_index:
+        
+                    previous_action = reverse_action_dict[df['position'][previous_index]]
+                    state = int(str(value) + str(previous_action))
+                else:
+                    state = int(str(value) + str(2))
                 action = self.learner.query(s_prime = value,r =r )
          
                 position = action_dict[action]
                 df['position'][index] = position
                 r = self.compute_reward(holdings=df['position'])
-                print(r)
+                #print(r)
                 #transaction costs
                 impact_amount = (df['next_price'][index] * position) * self.impact
                 r = r - (self.commission + abs(impact_amount))
+                previous_index = index
+                
 
 
 
@@ -167,39 +202,19 @@ class StrategyLearner(object):
                 
 
 
-    def query_for_live_data(self,prices, order_size = 50,symbol = 'AAPL'):
+    def query_for_live_data(self,prices,spy_prices, order_size = 50,symbol = 'AAPL'):
         shares_to_trade = order_size
         
+        df =pd.DataFrame()
+        df[symbol] = prices
+        df['SPY'] = spy_prices
 
-        #calculate indicators for prices
-        df = pd.DataFrame()
-        df['sma'] = indicators.run_SMA(prices,symbol=symbol)
-        df['momentum'] = -indicators.run_momentum(prices,symbol=symbol)
-        df['stochasticos'] = indicators.run_stochasticos(prices,symbol=symbol)
-        df['bollinger'] = indicators.run_stochasticos(prices,symbol=symbol)
-        # df['SPY_Ratio'] = indicators.run_SPY_Ratio(prices,spy_price_series=spy_prices,symbol=symbol)
-        
-        # print(df.head(20))
-        df.fillna(method = 'bfill', inplace=True)
-        df.fillna(method = 'ffill', inplace =True)
-
-        # discretize_indicators_SPY = pd.cut(df['SPY_Ratio'],bins = 10,labels=False, retbins=True,)[0]
-        discretize_indicators_SPY = discretize_indicators_SPY.astype(str)
-
-        discretize_indicators_sma = pd.cut(df['sma'],bins = 10,labels=False, retbins=True,)[0]
-        discretize_indicators_sma = discretize_indicators_sma.astype(str)
-        
-
-        discretize_indicators_stoc = pd.cut(df['stochasticos'],bins = 10,labels=False, retbins=True,)[0]
-        discretize_indicators_stoc = discretize_indicators_stoc.astype(str)
-
-        discretize_indicators_bol = pd.cut(df['bollinger'],bins = 10,labels=False, retbins=True,)[0]
-        discretize_indicators_bol = discretize_indicators_sma.astype(str)
-        discrete_indicators = discretize_indicators_sma + discretize_indicators_stoc + discretize_indicators_bol
-        discrete_indicators = discrete_indicators.astype(int)
+        df = self.calculate_discrete_state(symbol,prices,spy_prices = spy_prices)	
+        discrete_indicators	= df['discrete_indicator']	 
         action_dict = {0:-shares_to_trade
                         ,1: shares_to_trade
                         ,2:0}
+        
         df['position'] = discrete_indicators.apply(self.learner.querysetstate)
         df['position'] = df['position'].map(action_dict)
         return df['position']
@@ -228,47 +243,47 @@ class StrategyLearner(object):
         :rtype: pandas.DataFrame  		  	   		  	  			  		 			     			  	 
         """  
         start = time.process_time()
-   
-        prices = self.Marketsimulator.PRICES
-
-
-        df = pd.DataFrame()
-        df['sma'] = indicators.run_SMA(prices,symbol=symbol)
-        df['momentum'] = -indicators.run_momentum(prices,symbol=symbol)
-        df['stochasticos'] = indicators.run_stochasticos(prices,symbol=symbol)
-        df['bollinger'] = indicators.run_stochasticos(prices,symbol=symbol)
-        df['SPY_Ratio'] = indicators.run_SPY_Ratio(prices,spy_price_series=spy_prices,symbol=symbol)
-        # print(df.head(20))
-        df.fillna(method = 'ffill', inplace =True)
-        df.fillna(method = 'bfill', inplace=True)
-
-
-        discretize_indicators_SPY = pd.cut(df['SPY_Ratio'],bins = 10,labels=False, retbins=True,)[0]
-        discretize_indicators_SPY = discretize_indicators_SPY.astype(str)
-
-        discretize_indicators_sma = pd.cut(df['sma'],bins = 10,labels=False, retbins=True,)[0]
-        discretize_indicators_sma = discretize_indicators_sma.astype(str)
-        
-
-        discretize_indicators_stoc = pd.cut(df['stochasticos'],bins = 10,labels=False, retbins=True,)[0]
-        discretize_indicators_stoc = discretize_indicators_stoc.astype(str)
-
-        discretize_indicators_bol = pd.cut(df['bollinger'],bins = 10,labels=False, retbins=True,)[0]
-        discretize_indicators_bol = discretize_indicators_sma.astype(str) 
-
-        #discrete_indicators = discretize_indicators_sma + (discretize_indicators_stoc) + (discretize_indicators_bol)
-        
-        discrete_indicators = discretize_indicators_sma + discretize_indicators_stoc + discretize_indicators_bol + discretize_indicators_SPY
-        discrete_indicators = discrete_indicators.astype(int)
+        prices_all = self.Marketsimulator.PRICES
+        spy_prices = self.Marketsimulator.SPY_PRICES		  	   		  	  			  		 			     			  	 
+        df = self.calculate_discrete_state(symbol,
+                prices_all=prices_all,spy_prices=spy_prices,
+                spy_bins = self.SPY_BINS,
+                stoc_bins = self.STOC_BINS,
+                bol_bins =self.BOL_BINS 	  			  		 			     			  			     			  	 
+)	
+        discrete_indicators	= df['discrete_indicator']	 
         start = time.process_time()
-
+        df['position'] = 0
+        discrete_indicators.index.values.astype(float)
+        first_index = discrete_indicators.first_valid_index()
         shares_to_trade = 60
         action_dict = {0:-shares_to_trade
                         ,1: shares_to_trade
                         ,2:0}
-        df['position'] = 0
-        df['position'] = discrete_indicators.apply(self.learner.querysetstate)
-        df['position'] = df['position'].map(action_dict)
+        reverse_action_dict = {-shares_to_trade:0,
+                                shares_to_trade:1,
+                                0:2
+        }
+        previous_indexv=0
+  
+        for index,value in discrete_indicators.iteritems():
+            if index >first_index:
+                #print(str(df['position'][previous_index]))
+                previous_action = reverse_action_dict[df['position'][previous_index]]
+                state = int(str(value) + str(previous_action))
+            else:
+                state = int(str(value) + str(2))
+                
+            action = self.learner.querysetstate(s = state)
+         
+            position = action_dict[action]
+            df['position'][index] = position
+            previous_index = index
+
+       
+  
+        # df['position'] = discrete_indicators.apply(self.learner.querysetstate)
+        # df['position'] = df['position'].map(action_dict)
         # for index,value in discrete_indicators.iteritems():
             
         #     action = self.learner.querysetstate(s = value)

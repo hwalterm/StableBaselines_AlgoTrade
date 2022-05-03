@@ -60,7 +60,7 @@ class QLearner(object):
         alpha=0.2,  		  	   		  	  			  		 			     			  	 
         gamma=0.9,  		  	   		  	  			  		 			     			  	 
         rar=0.5,  		  	   		  	  			  		 			     			  	 
-        radr=0.999,  		  	   		  	  			  		 			     			  	 
+        radr=0.9995,  		  	   		  	  			  		 			     			  	 
         dyna=0,  		  	   		  	  			  		 			     			  	 
         verbose=False,		  	   		  	  			  		 			     			  	 
     ):  		  	   		  	  			  		 			     			  	 

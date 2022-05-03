@@ -18,7 +18,7 @@ class live_trader(object):
     def __init__(self,
                 learner,
                 symbol = 'AAPL', 
-                order_size = 50,               
+                order_size = 100,               
                 ttc = 99):
         BASE_URL = "https://paper-api.alpaca.markets"
         ALPACA_API_KEY = "PKVH1SZ416UXYP2WMQDC"
@@ -30,7 +30,10 @@ class live_trader(object):
         self.symbol = symbol
         self.order_size = order_size
         self.close_prices = [159.59, 159.595, 159.54, 159.52, 159.6, 159.575, 159.5, 159.49, 159.315, 159.47, 159.645, 159.75, 159.765, 159.56, 159.595, 159.67, 159.655, 159.55, 159.425,]
+        self.SPY_prices = [159.59, 159.595, 159.54, 159.52, 159.6, 159.575, 159.5, 159.49, 159.315, 159.47, 159.645, 159.75, 159.765, 159.56, 159.595, 159.67, 159.655, 159.55, 159.425,]
         self.learner = learner
+        self.count_of_prices_to_retain = 40
+   
 
     def consumer_thread(self):
 
@@ -42,11 +45,10 @@ class live_trader(object):
         async def handle_bar(bar):
             print(bar.close)
             #if there are less than 20 bars, add the bar otherwise keep only the last 19 and add the newest
-            if (len(self.close_prices)< 20):
+            if (len(self.close_prices)< self.count_of_prices_to_retain):
                 self.close_prices.append(bar.close)
             else:
-                self.close_prices = self.close_prices[-19:]
-                self.close_prices.append(bar.close)
+                self.close_prices = (self.close_prices[-19:]).append(bar.close)
                 self.execute_QAction()
 
             print(self.close_prices)
@@ -54,8 +56,14 @@ class live_trader(object):
             #update bars to add new list
             print('bar', bar)
 
+        async def handle_SPY(bar):
+            if (len(self.SPY_prices)< self.count_of_prices_to_retain):
+                self.SPY_prices.append(bar.close)
+            else:
+                self.SPY_prices = (self.close_prices[-19:]).append(bar.close)
+
    
-        
+        conn.subscribe_bars(handle_SPY,'SPY')
         conn.subscribe_bars(handle_bar, 'AAPL')
         conn.run()
 
@@ -69,9 +77,12 @@ class live_trader(object):
             current_position = int(self.api.get_position(symbol = self.symbol).qty)
         except tradeapi.rest.APIError:
             current_position = 0
-        target_position = self.learner.query_for_live_data(self.close_prices,
+        #query the learner to get the prices
+        target_position = self.learner.query_for_live_data(prices = self.close_prices,
+                                                 spy_prices = self.SPY_prices,
                                                  order_size = self.order_size,
-                                                 symbol = self.symbol)
+                                                 symbol = self.symbol
+                                                 )
         difference_between_target = abs(target_position - current_position)
         #if we are not at our position cancel existing trades and make a trade to achieve desired position
         if difference_between_target != 0:

@@ -38,10 +38,10 @@ def get_SPY_data (starttime = (curr_datetime - timedelta(days=3)).isoformat(),
 
 
 def train_test_strategy_learner(symbol = "AAPL",
-    training_sd=(curr_datetime - timedelta(days=3)).isoformat(),
-    training_ed=(curr_datetime-timedelta(days=1)).isoformat(),
-    testing_sd =(curr_datetime - timedelta(days=1)).isoformat(),
-    testing_ed =(curr_datetime - timedelta(minutes = 30)).isoformat()
+    training_sd=(curr_datetime - timedelta(days=6)).isoformat(),
+    training_ed=(curr_datetime-timedelta(days=5)).isoformat(),
+    testing_sd =(curr_datetime - timedelta(days=5)).isoformat(),
+    testing_ed =(curr_datetime - timedelta(days = 4)).isoformat()
 
      ):
     ##################################################################################
@@ -81,7 +81,7 @@ def train_test_strategy_learner(symbol = "AAPL",
     show_df['orders']= orders
     show_df['portval'] = portval
     show_df[symbol] = marketsimulator.PRICES[symbol]
-    print(show_df.head(100))
+    print(show_df.tail(100))
     return portval, learner
 def awaitMarketOpen():
     isOpen = api.get_clock().is_open
@@ -104,9 +104,8 @@ if __name__ == '__main__':
     #run_awaitMarketOpen()
     print('train learner')
     testval, learner = train_test_strategy_learner()
-    trader = live_trader.live_trader(learner=learner)
-    trader.consumer_thread()
-    #train_test_strategy_learner()
+    # trader = live_trader.live_trader(learner=learner)
+    # trader.consumer_thread()
 
 
 
