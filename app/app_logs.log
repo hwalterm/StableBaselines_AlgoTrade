@@ -1,0 +1,124 @@
+2022-04-29 18:53:30,618 started stock data stream
+2022-04-29 18:53:30,619 starting stock data websocket connection
+2022-04-29 18:53:31,406 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-04-29 18:53:31,438 subscribed to trades: [], quotes: [], bars: ['AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-04-29 18:55:56,587 started stock data stream
+2022-04-29 18:55:56,588 starting stock data websocket connection
+2022-04-29 18:55:57,263 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-04-29 18:55:57,295 subscribed to trades: [], quotes: [], bars: ['AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-04-29 19:01:51,288 started stock data stream
+2022-04-29 19:01:51,289 starting stock data websocket connection
+2022-04-29 19:01:51,570 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-04-29 19:01:51,598 subscribed to trades: [], quotes: [], bars: ['AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-04-29 19:07:40,316 started stock data stream
+2022-04-29 19:07:40,317 starting stock data websocket connection
+2022-04-29 19:07:40,554 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-04-29 19:07:40,584 subscribed to trades: [], quotes: [], bars: ['AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-04-29 19:11:22,992 started stock data stream
+2022-04-29 19:11:22,992 starting stock data websocket connection
+2022-04-29 19:11:23,259 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-04-29 19:11:23,342 subscribed to trades: [], quotes: [], bars: ['AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-04-29 19:13:18,323 started stock data stream
+2022-04-29 19:13:18,324 starting stock data websocket connection
+2022-04-29 19:13:18,536 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-04-29 19:13:18,566 subscribed to trades: [], quotes: [], bars: ['AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-04-29 19:25:52,432 started stock data stream
+2022-04-29 19:25:52,433 starting stock data websocket connection
+2022-04-29 19:25:53,386 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-04-29 19:25:53,417 subscribed to trades: [], quotes: [], bars: ['AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-04-29 19:31:00,786 started stock data stream
+2022-04-29 19:31:00,788 starting stock data websocket connection
+2022-04-29 19:31:01,039 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-04-29 19:31:01,066 subscribed to trades: [], quotes: [], bars: ['AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-04-29 19:39:57,666 started stock data stream
+2022-04-29 19:39:57,667 starting stock data websocket connection
+2022-04-29 19:39:57,905 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-04-29 19:39:57,935 subscribed to trades: [], quotes: [], bars: ['AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-04-29 19:40:17,994 Fatal error on SSL transport
+protocol: <asyncio.sslproto.SSLProtocol object at 0x7fd6a3aee7c0>
+transport: <_SelectorSocketTransport closing fd=12>
+Traceback (most recent call last):
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/selector_events.py", line 908, in write
+    n = self._sock.send(data)
+OSError: [Errno 9] Bad file descriptor
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/sslproto.py", line 685, in _process_write_backlog
+    self._transport.write(chunk)
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/selector_events.py", line 914, in write
+    self._fatal_error(exc, 'Fatal write error on socket transport')
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/selector_events.py", line 709, in _fatal_error
+    self._force_close(exc)
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/selector_events.py", line 721, in _force_close
+    self._loop.call_soon(self._call_connection_lost, exc)
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/base_events.py", line 719, in call_soon
+    self._check_closed()
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/base_events.py", line 508, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+2022-04-29 19:40:18,012 Task was destroyed but it is pending!
+task: <Task pending name='Task-9' coro=<WebSocketCommonProtocol.close_connection() done, defined at /Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/websockets/legacy/protocol.py:1273> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7fd6a3a84220>()]> cb=[gather.<locals>._done_callback() at /Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/tasks.py:758]>
+2022-04-29 19:41:49,249 started stock data stream
+2022-04-29 19:41:49,251 starting stock data websocket connection
+2022-04-29 19:41:49,520 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-04-29 19:41:49,549 subscribed to trades: [], quotes: [], bars: ['AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-04-29 19:43:05,086 started stock data stream
+2022-04-29 19:43:05,087 starting stock data websocket connection
+2022-04-29 19:43:05,718 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-04-29 19:43:05,753 subscribed to trades: [], quotes: [], bars: ['AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-04-29 20:21:06,741 started stock data stream
+2022-04-29 20:21:06,742 starting stock data websocket connection
+2022-04-29 20:21:07,059 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-04-29 20:21:07,093 subscribed to trades: [], quotes: [], bars: ['AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-04-29 20:23:00,636 Fatal error on SSL transport
+protocol: <asyncio.sslproto.SSLProtocol object at 0x7fab0d235670>
+transport: <_SelectorSocketTransport closing fd=12>
+Traceback (most recent call last):
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/selector_events.py", line 908, in write
+    n = self._sock.send(data)
+OSError: [Errno 9] Bad file descriptor
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/sslproto.py", line 685, in _process_write_backlog
+    self._transport.write(chunk)
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/selector_events.py", line 914, in write
+    self._fatal_error(exc, 'Fatal write error on socket transport')
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/selector_events.py", line 709, in _fatal_error
+    self._force_close(exc)
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/selector_events.py", line 721, in _force_close
+    self._loop.call_soon(self._call_connection_lost, exc)
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/base_events.py", line 719, in call_soon
+    self._check_closed()
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/base_events.py", line 508, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+2022-04-29 20:23:00,663 Task was destroyed but it is pending!
+task: <Task pending name='Task-9' coro=<WebSocketCommonProtocol.close_connection() done, defined at /Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/websockets/legacy/protocol.py:1273> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7fab0d219130>()]> cb=[gather.<locals>._done_callback() at /Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/tasks.py:758]>
+2022-05-02 20:56:36,347 started stock data stream
+2022-05-02 20:56:36,348 starting stock data websocket connection
+2022-05-02 20:56:38,414 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-05-02 20:56:38,446 subscribed to trades: [], quotes: [], bars: ['AAPL', 'SPY'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-05-03 09:07:26,542 started stock data stream
+2022-05-03 09:07:26,542 starting stock data websocket connection
+2022-05-03 09:07:28,178 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-05-03 09:07:28,208 subscribed to trades: [], quotes: [], bars: ['SPY', 'AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-05-03 09:13:02,228 started stock data stream
+2022-05-03 09:13:02,229 starting stock data websocket connection
+2022-05-03 09:13:02,743 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-05-03 09:13:02,773 subscribed to trades: [], quotes: [], bars: ['AAPL', 'SPY'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-05-03 09:16:37,687 started stock data stream
+2022-05-03 09:16:37,688 starting stock data websocket connection
+2022-05-03 09:16:37,954 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-05-03 09:16:37,985 subscribed to trades: [], quotes: [], bars: ['SPY', 'AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-05-03 09:21:25,341 started stock data stream
+2022-05-03 09:21:25,343 starting stock data websocket connection
+2022-05-03 09:21:25,582 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-05-03 09:21:25,615 subscribed to trades: [], quotes: [], bars: ['SPY', 'AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-05-03 09:23:54,260 started stock data stream
+2022-05-03 09:23:54,261 starting stock data websocket connection
+2022-05-03 09:23:54,561 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-05-03 09:23:54,591 subscribed to trades: [], quotes: [], bars: ['SPY', 'AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
