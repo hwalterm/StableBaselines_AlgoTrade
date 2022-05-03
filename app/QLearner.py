@@ -92,6 +92,7 @@ class QLearner(object):
         :rtype: int  		  	   		  	  			  		 			     			  	 
         """  		  	   		  	  			  		 			     			  	 
         self.s = s
+        print('q learner state: {}'.format(s))
         action = self.Q[self.s].index(max(self.Q[self.s]))
         
         

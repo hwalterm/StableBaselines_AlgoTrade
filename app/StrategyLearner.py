@@ -66,7 +66,7 @@ class StrategyLearner(object):
         self.commission = commission
         self.learner = QLearner(num_states = 10000, num_actions = 3)  	
         self.Marketsimulator = marketsimulator
-        self.train_time = 60
+        self.train_time = 30
         #not currently using saved bins
         self.SPY_BINS =[] 
         self.STOC_BINS = []
@@ -100,7 +100,6 @@ class StrategyLearner(object):
         df['stochasticos'] = indicators.run_stochasticos(prices,symbol=symbol)
         df['bollinger'] = indicators.run_bollinger(prices,symbol=symbol)	
         df['SPY_Ratio'] = indicators.run_SPY_Ratio(prices,spy_price_series=spy_prices,symbol=symbol)
-
         df.fillna(method = 'ffill', inplace=True)
         df.fillna(method = 'bfill', inplace =True)
         
@@ -124,8 +123,10 @@ class StrategyLearner(object):
         #discrete_indicators = discretize_indicators_sma + (discretize_indicators_stoc) + (discretize_indicators_bol)
         
         discrete_indicators = discretize_indicators_stoc + discretize_indicators_bol + discretize_indicators_SPY
+        
         discrete_indicators = discrete_indicators.astype(float).astype(int)
         df['discrete_indicator'] = discrete_indicators
+        print(df)
         return df	  			  		 			     			  	 
   		  	   		  
 
@@ -188,7 +189,7 @@ class StrategyLearner(object):
                 position = action_dict[action]
                 df['position'][index] = position
                 r = self.compute_reward(holdings=df['position'])
-                print(r)
+                #print(r)
                 #transaction costs
                 impact_amount = (df['next_price'][index] * position) * self.impact
                 r = r - (self.commission + abs(impact_amount))
@@ -210,23 +211,26 @@ class StrategyLearner(object):
         #As standard encoding for the Q learner, we use:
         # 0 to denote a short position
         # 1 to denote long position
-        # 2 to denote no
-        state = int(str(value) + str(previous_action))
+        # 2 to denote no position
 
-
+        print('query for live data')
         
         df =pd.DataFrame()
+        
         df[symbol] = prices
         df['SPY'] = spy_prices
-
-        df = self.calculate_discrete_state(symbol,prices,spy_prices = spy_prices)	
-        discrete_indicators	= df['discrete_indicator']	 
+        print(df)
+        print('prices: {}'.format(prices))
+        df = self.calculate_discrete_state(symbol,prices_all = df,spy_prices = spy_prices)	
+        discrete_indicators	= df['discrete_indicator']
+        print('returned indicators {}'.format(discrete_indicators))	 
         action_dict = {0:-shares_to_trade
                         ,1: shares_to_trade
                         ,2:0}
         state = int(str(discrete_indicators[-1]) + str(current_position))
-        
+        print('state: {}'.format(state))
         action = self.learner.querysetstate(s = state)
+        print('action: {}'.format(action))
         position = action_dict[action]
         #df['position'] = discrete_indicators.apply(self.learner.querysetstate)
         #df['position'] = df['position'].map(action_dict)

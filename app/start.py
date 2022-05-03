@@ -109,8 +109,9 @@ if __name__ == '__main__':
     #run_awaitMarketOpen()
     print('train learner')
     testval, learner = train_test_strategy_learner(symbol=symbol)
-    # trader = live_trader.live_trader(learner=learner, symbol = symbol)
-    # trader.consumer_thread()
+    trader = live_trader.live_trader(learner=learner,
+    Qlearner = learner.learner, symbol = symbol)
+    trader.consumer_thread()
 
 
 
