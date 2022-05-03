@@ -255,7 +255,7 @@ class StrategyLearner(object):
         discrete_indicators	= df['discrete_indicator']	 
         start = time.process_time()
         df['position'] = 0
-        discrete_indicators.index.values.astype(float)
+        #discrete_indicators.index.values.astype(float)
         first_index = discrete_indicators.first_valid_index()
         shares_to_trade = 60
         action_dict = {0:-shares_to_trade
@@ -265,7 +265,7 @@ class StrategyLearner(object):
                                 shares_to_trade:1,
                                 0:2
         }
-        previous_indexv=0
+        previous_index=0
   
         for index,value in discrete_indicators.iteritems():
             if index >first_index:
