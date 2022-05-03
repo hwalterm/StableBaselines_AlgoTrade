@@ -112,6 +112,7 @@ if __name__ == '__main__':
     trader = live_trader.live_trader(learner=learner,
     Qlearner = learner.learner, symbol = symbol)
     trader.consumer_thread()
+    print('after consumer thread')
 
 
 

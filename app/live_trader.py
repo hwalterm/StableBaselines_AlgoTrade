@@ -1,5 +1,6 @@
 import alpaca_trade_api as tradeapi
 import StrategyLearner as sl
+from QLearner import QLearner
 from marketsimcode import marketsim
 from datetime import datetime,timezone, timedelta
 import pandas as pd
@@ -8,6 +9,7 @@ import time
 from alpaca_trade_api.stream import Stream
 from alpaca_trade_api.common import URL
 import threading
+import asyncio
 
 # API Info for fetching data, portfolio, etc. from Alpaca
 print('beginning live trade')
@@ -37,6 +39,7 @@ class live_trader(object):
         self.learner = learner
         self.count_of_prices_to_retain = 10
         self.Qlearner = Qlearner
+        QTable = Qlearner.Q
    
 
     def consumer_thread(self):
@@ -52,6 +55,8 @@ class live_trader(object):
             if (len(self.close_prices)< self.count_of_prices_to_retain):
                 self.close_prices.append(bar.close)
             else:
+                index_to_retain = self.count_of_prices_to_retain -1
+                self.close_prices = (self.close_prices[-index_to_retain:])
                 #######################################################
                 #Get Q action
                 # print('get_Qaction prices: '.format(self.close_prices))
@@ -69,9 +74,8 @@ class live_trader(object):
                 #     mapped_position = 1
                 # elif current_position < 0:
                 #     mapped_position =0
-                # index_to_retain = self.count_of_prices_to_retain -1
-                # self.close_prices = (self.close_prices[-index_to_retain:])
-                # self.close_prices.append(bar.close)
+                
+                
                 ####################################
                 #query live data 
                 # print('query for live data')
@@ -95,10 +99,7 @@ class live_trader(object):
                 # position = action_dict[action]
                 
                 ####################################
-
-                await self.execute_QAction()
-
-            
+    
             #update bars to add new list
             
 
@@ -110,10 +111,19 @@ class live_trader(object):
                 self.SPY_prices = self.SPY_prices[-index_to_retain:]
                 self.SPY_prices.append(bar.close)
 
-   
-        # conn.subscribe_bars(handle_SPY,'SPY')
+        # loop = asyncio.get_event_loop()
+        # loop.run_until_complete(self.run_forevs())
+        print('set up bars')
+        conn.subscribe_bars(handle_SPY,'SPY')
         conn.subscribe_bars(handle_bar, self.symbol)
         conn.run()
+        print(self.timeToClose)
+
+    async def run_forevs(self):
+        while(1):
+            print('running')
+            time.sleep(10)
+            print('still running')
 
     def execute_QAction(self):
 
@@ -210,9 +220,11 @@ class live_trader(object):
         action_dict = {0:-shares_to_trade
                         ,1: shares_to_trade
                         ,2:0}
-        state = int(str(discrete_indicators[-1]) + str(current_position))
+        print('curr pos:' + str(current_position))
+        state = '999'
         print('state: {}'.format(state))
-        action = self.Qlearner.querysetstate(s = state)
+        action = 2
+        #action = self.Qlearner.querysetstate(s = state)
         print('action: {}'.format(action))
         position = action_dict[action]
         return position        

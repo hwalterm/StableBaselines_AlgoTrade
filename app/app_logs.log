@@ -28616,3 +28616,374 @@ Traceback (most recent call last):
   File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/pandas/core/common.py", line 557, in require_length_match
     raise ValueError(
 ValueError: Length of values (19) does not match length of index (10)
+2022-05-03 14:12:50,877 started stock data stream
+2022-05-03 14:12:50,879 starting stock data websocket connection
+2022-05-03 14:12:51,135 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-05-03 14:12:51,169 subscribed to trades: [], quotes: [], bars: ['AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-05-03 14:12:59,763 error during websocket communication: -1
+Traceback (most recent call last):
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/pandas/core/indexes/range.py", line 385, in get_loc
+    return self._range.index(new_key)
+ValueError: -1 is not in range
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 261, in _run_forever
+    await self._consume()
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 128, in _consume
+    await self._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 404, in _dispatch
+    await super()._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 178, in _dispatch
+    await handler(self._cast(msg_type, msg))
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 99, in handle_bar
+    await self.execute_QAction()
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 137, in execute_QAction
+    target_position = self.query_for_live_data(prices = self.close_prices,
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 213, in query_for_live_data
+    state = int(str(discrete_indicators[-1]) + str(current_position))
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/pandas/core/series.py", line 958, in __getitem__
+    return self._get_value(key)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/pandas/core/series.py", line 1069, in _get_value
+    loc = self.index.get_loc(label)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/pandas/core/indexes/range.py", line 387, in get_loc
+    raise KeyError(key) from err
+KeyError: -1
+2022-05-03 14:14:00,419 error during websocket communication: -1
+Traceback (most recent call last):
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/pandas/core/indexes/range.py", line 385, in get_loc
+    return self._range.index(new_key)
+ValueError: -1 is not in range
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 261, in _run_forever
+    await self._consume()
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 128, in _consume
+    await self._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 404, in _dispatch
+    await super()._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 178, in _dispatch
+    await handler(self._cast(msg_type, msg))
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 99, in handle_bar
+    await self.execute_QAction()
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 137, in execute_QAction
+    target_position = self.query_for_live_data(prices = self.close_prices,
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 213, in query_for_live_data
+    state = int(str(discrete_indicators[-1]) + str(current_position))
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/pandas/core/series.py", line 958, in __getitem__
+    return self._get_value(key)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/pandas/core/series.py", line 1069, in _get_value
+    loc = self.index.get_loc(label)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/pandas/core/indexes/range.py", line 387, in get_loc
+    raise KeyError(key) from err
+KeyError: -1
+2022-05-03 14:15:16,669 started stock data stream
+2022-05-03 14:15:16,671 starting stock data websocket connection
+2022-05-03 14:15:16,864 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-05-03 14:15:16,892 subscribed to trades: [], quotes: [], bars: ['AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-05-03 14:16:00,305 error during websocket communication: -1
+Traceback (most recent call last):
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/pandas/core/indexes/range.py", line 385, in get_loc
+    return self._range.index(new_key)
+ValueError: -1 is not in range
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 261, in _run_forever
+    await self._consume()
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 128, in _consume
+    await self._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 404, in _dispatch
+    await super()._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 178, in _dispatch
+    await handler(self._cast(msg_type, msg))
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 99, in handle_bar
+    await self.execute_QAction()
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 137, in execute_QAction
+    target_position = self.query_for_live_data(prices = self.close_prices,
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 213, in query_for_live_data
+    state = int(str(discrete_indicators[-1]) + str(current_position))
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/pandas/core/series.py", line 958, in __getitem__
+    return self._get_value(key)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/pandas/core/series.py", line 1069, in _get_value
+    loc = self.index.get_loc(label)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/pandas/core/indexes/range.py", line 387, in get_loc
+    raise KeyError(key) from err
+KeyError: -1
+2022-05-03 14:17:00,133 error during websocket communication: -1
+Traceback (most recent call last):
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/pandas/core/indexes/range.py", line 385, in get_loc
+    return self._range.index(new_key)
+ValueError: -1 is not in range
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 261, in _run_forever
+    await self._consume()
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 128, in _consume
+    await self._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 404, in _dispatch
+    await super()._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 178, in _dispatch
+    await handler(self._cast(msg_type, msg))
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 99, in handle_bar
+    await self.execute_QAction()
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 137, in execute_QAction
+    target_position = self.query_for_live_data(prices = self.close_prices,
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 213, in query_for_live_data
+    state = int(str(discrete_indicators[-1]) + str(current_position))
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/pandas/core/series.py", line 958, in __getitem__
+    return self._get_value(key)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/pandas/core/series.py", line 1069, in _get_value
+    loc = self.index.get_loc(label)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/pandas/core/indexes/range.py", line 387, in get_loc
+    raise KeyError(key) from err
+KeyError: -1
+2022-05-03 14:20:39,133 started stock data stream
+2022-05-03 14:20:39,134 starting stock data websocket connection
+2022-05-03 14:20:39,418 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-05-03 14:20:39,443 subscribed to trades: [], quotes: [], bars: ['AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-05-03 14:21:01,375 error during websocket communication: -1
+Traceback (most recent call last):
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/pandas/core/indexes/range.py", line 385, in get_loc
+    return self._range.index(new_key)
+ValueError: -1 is not in range
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 261, in _run_forever
+    await self._consume()
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 128, in _consume
+    await self._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 404, in _dispatch
+    await super()._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 178, in _dispatch
+    await handler(self._cast(msg_type, msg))
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 99, in handle_bar
+    await self.execute_QAction()
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 137, in execute_QAction
+    target_position = self.query_for_live_data(prices = self.close_prices,
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 214, in query_for_live_data
+    state = int(str(discrete_indicators[-1]) + str(current_position))
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/pandas/core/series.py", line 958, in __getitem__
+    return self._get_value(key)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/pandas/core/series.py", line 1069, in _get_value
+    loc = self.index.get_loc(label)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/pandas/core/indexes/range.py", line 387, in get_loc
+    raise KeyError(key) from err
+KeyError: -1
+2022-05-03 14:21:45,989 Task was destroyed but it is pending!
+task: <Task pending name='Task-9' coro=<WebSocketCommonProtocol.close_connection() running at /Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/websockets/legacy/protocol.py:1299> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7fa29b631d00>()]> cb=[gather.<locals>._done_callback() at /Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/tasks.py:758]>
+2022-05-03 14:22:22,221 started stock data stream
+2022-05-03 14:22:22,228 starting stock data websocket connection
+2022-05-03 14:22:22,490 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-05-03 14:22:22,520 subscribed to trades: [], quotes: [], bars: ['AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-05-03 14:23:00,081 error during websocket communication: type object 'datetime.datetime' has no attribute 'timezone'
+Traceback (most recent call last):
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 261, in _run_forever
+    await self._consume()
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 128, in _consume
+    await self._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 404, in _dispatch
+    await super()._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 178, in _dispatch
+    await handler(self._cast(msg_type, msg))
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 99, in handle_bar
+    await self.execute_QAction()
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 149, in execute_QAction
+    if self.is_EOD():
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 166, in is_EOD
+    closingTime = clock.next_close.replace(tzinfo=datetime.timezone.utc).timestamp()
+AttributeError: type object 'datetime.datetime' has no attribute 'timezone'
+2022-05-03 14:24:00,146 error during websocket communication: type object 'datetime.datetime' has no attribute 'timezone'
+Traceback (most recent call last):
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 261, in _run_forever
+    await self._consume()
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 128, in _consume
+    await self._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 404, in _dispatch
+    await super()._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 178, in _dispatch
+    await handler(self._cast(msg_type, msg))
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 99, in handle_bar
+    await self.execute_QAction()
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 149, in execute_QAction
+    if self.is_EOD():
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 166, in is_EOD
+    closingTime = clock.next_close.replace(tzinfo=datetime.timezone.utc).timestamp()
+AttributeError: type object 'datetime.datetime' has no attribute 'timezone'
+2022-05-03 14:25:37,550 started stock data stream
+2022-05-03 14:25:37,552 starting stock data websocket connection
+2022-05-03 14:25:37,800 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-05-03 14:25:37,830 subscribed to trades: [], quotes: [], bars: ['AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-05-03 14:26:10,313 error during websocket communication: object NoneType can't be used in 'await' expression
+Traceback (most recent call last):
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 261, in _run_forever
+    await self._consume()
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 128, in _consume
+    await self._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 404, in _dispatch
+    await super()._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 178, in _dispatch
+    await handler(self._cast(msg_type, msg))
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 99, in handle_bar
+    await time.sleep(10)
+TypeError: object NoneType can't be used in 'await' expression
+2022-05-03 14:27:09,932 error during websocket communication: object NoneType can't be used in 'await' expression
+Traceback (most recent call last):
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 261, in _run_forever
+    await self._consume()
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 128, in _consume
+    await self._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 404, in _dispatch
+    await super()._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 178, in _dispatch
+    await handler(self._cast(msg_type, msg))
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 99, in handle_bar
+    await time.sleep(10)
+TypeError: object NoneType can't be used in 'await' expression
+2022-05-03 14:33:24,187 started stock data stream
+2022-05-03 14:33:24,187 starting stock data websocket connection
+2022-05-03 14:33:24,457 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-05-03 14:33:24,485 subscribed to trades: [], quotes: [], bars: ['AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-05-03 14:34:09,978 error during websocket communication: a coroutine was expected, got None
+Traceback (most recent call last):
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 261, in _run_forever
+    await self._consume()
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 128, in _consume
+    await self._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 404, in _dispatch
+    await super()._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 178, in _dispatch
+    await handler(self._cast(msg_type, msg))
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 100, in handle_bar
+    task1 = asyncio.create_task(time.sleep(10))
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/tasks.py", line 382, in create_task
+    task = loop.create_task(coro)
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/base_events.py", line 431, in create_task
+    task = tasks.Task(coro, loop=self, name=name)
+TypeError: a coroutine was expected, got None
+2022-05-03 14:35:09,252 error during websocket communication: a coroutine was expected, got None
+Traceback (most recent call last):
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 261, in _run_forever
+    await self._consume()
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 128, in _consume
+    await self._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 404, in _dispatch
+    await super()._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 178, in _dispatch
+    await handler(self._cast(msg_type, msg))
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 100, in handle_bar
+    task1 = asyncio.create_task(time.sleep(10))
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/tasks.py", line 382, in create_task
+    task = loop.create_task(coro)
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/base_events.py", line 431, in create_task
+    task = tasks.Task(coro, loop=self, name=name)
+TypeError: a coroutine was expected, got None
+2022-05-03 14:36:10,226 error during websocket communication: a coroutine was expected, got None
+Traceback (most recent call last):
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 261, in _run_forever
+    await self._consume()
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 128, in _consume
+    await self._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 404, in _dispatch
+    await super()._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 178, in _dispatch
+    await handler(self._cast(msg_type, msg))
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 100, in handle_bar
+    task1 = asyncio.create_task(time.sleep(10))
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/tasks.py", line 382, in create_task
+    task = loop.create_task(coro)
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/base_events.py", line 431, in create_task
+    task = tasks.Task(coro, loop=self, name=name)
+TypeError: a coroutine was expected, got None
+2022-05-03 14:37:10,302 error during websocket communication: a coroutine was expected, got None
+Traceback (most recent call last):
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 261, in _run_forever
+    await self._consume()
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 128, in _consume
+    await self._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 404, in _dispatch
+    await super()._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 178, in _dispatch
+    await handler(self._cast(msg_type, msg))
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 100, in handle_bar
+    task1 = asyncio.create_task(time.sleep(10))
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/tasks.py", line 382, in create_task
+    task = loop.create_task(coro)
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/base_events.py", line 431, in create_task
+    task = tasks.Task(coro, loop=self, name=name)
+TypeError: a coroutine was expected, got None
+2022-05-03 14:56:21,852 started stock data stream
+2022-05-03 14:56:21,855 starting stock data websocket connection
+2022-05-03 14:56:22,131 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-05-03 14:56:22,161 subscribed to trades: [], quotes: [], bars: ['AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-05-03 14:57:10,267 error during websocket communication: a coroutine was expected, got None
+Traceback (most recent call last):
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 261, in _run_forever
+    await self._consume()
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 128, in _consume
+    await self._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 404, in _dispatch
+    await super()._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 178, in _dispatch
+    await handler(self._cast(msg_type, msg))
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 102, in handle_bar
+    task1 = asyncio.create_task(time.sleep(10))
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/tasks.py", line 382, in create_task
+    task = loop.create_task(coro)
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/base_events.py", line 431, in create_task
+    task = tasks.Task(coro, loop=self, name=name)
+TypeError: a coroutine was expected, got None
+2022-05-03 15:00:32,022 started stock data stream
+2022-05-03 15:00:32,024 starting stock data websocket connection
+2022-05-03 15:00:32,236 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-05-03 15:00:32,266 subscribed to trades: [], quotes: [], bars: ['AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-05-03 15:01:10,197 error during websocket communication: a coroutine was expected, got None
+Traceback (most recent call last):
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 261, in _run_forever
+    await self._consume()
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 128, in _consume
+    await self._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 404, in _dispatch
+    await super()._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 178, in _dispatch
+    await handler(self._cast(msg_type, msg))
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 102, in handle_bar
+    #update bars to add new list
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/tasks.py", line 382, in create_task
+    task = loop.create_task(coro)
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/base_events.py", line 431, in create_task
+    task = tasks.Task(coro, loop=self, name=name)
+TypeError: a coroutine was expected, got None
+2022-05-03 15:02:10,100 error during websocket communication: a coroutine was expected, got None
+Traceback (most recent call last):
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 261, in _run_forever
+    await self._consume()
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 128, in _consume
+    await self._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 404, in _dispatch
+    await super()._dispatch(msg)
+  File "/Users/hershelalterman/Projects/algotrade/algotrade/lib/python3.8/site-packages/alpaca_trade_api/stream.py", line 178, in _dispatch
+    await handler(self._cast(msg_type, msg))
+  File "/Users/hershelalterman/Projects/algotrade/app/live_trader.py", line 102, in handle_bar
+    #update bars to add new list
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/tasks.py", line 382, in create_task
+    task = loop.create_task(coro)
+  File "/Users/hershelalterman/opt/anaconda3/lib/python3.8/asyncio/base_events.py", line 431, in create_task
+    task = tasks.Task(coro, loop=self, name=name)
+TypeError: a coroutine was expected, got None
+2022-05-03 15:06:05,588 started stock data stream
+2022-05-03 15:06:05,590 starting stock data websocket connection
+2022-05-03 15:06:05,828 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-05-03 15:06:05,855 subscribed to trades: [], quotes: [], bars: ['AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
+2022-05-03 15:46:50,674 started stock data stream
+2022-05-03 15:46:50,683 starting stock data websocket connection
+2022-05-03 15:46:50,963 connected to: wss://stream.data.alpaca.markets/v2/iex
+2022-05-03 15:46:50,994 subscribed to trades: [], quotes: [], bars: ['SPY', 'AAPL'], updatedBars: [], dailyBars: [], statuses: [], lulds: [], cancelErrors: [], corrections: []
