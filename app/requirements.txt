@@ -8,8 +8,10 @@ charset-normalizer==2.0.12
 deprecation==2.1.0
 frozenlist==1.3.0
 idna==3.3
+lxml==4.8.0
 msgpack==1.0.3
 multidict==6.0.2
+multitasking==0.0.10
 numpy==1.22.3
 packaging==21.3
 pandas==1.4.2
@@ -18,8 +20,11 @@ python-dateutil==2.8.2
 pytz==2022.1
 PyYAML==6.0
 requests==2.27.1
+simplejson==3.17.6
 six==1.16.0
 urllib3==1.26.9
 websocket-client==1.3.2
 websockets==10.3
+yahoo-finance==1.4.0
 yarl==1.7.2
+yfinance==0.1.70

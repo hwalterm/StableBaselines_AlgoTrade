@@ -6,10 +6,14 @@ from datetime import datetime,timezone, timedelta
 import pandas as pd
 import logging
 import time
-from alpaca_trade_api.stream import Stream
+# from alpaca_trade_api.stream import Stream
 from alpaca_trade_api.common import URL
 import threading
 import asyncio
+import yfinance as yf
+from decimal import *
+getcontext().prec = 2
+
 
 # API Info for fetching data, portfolio, etc. from Alpaca
 print('beginning live trade')
@@ -23,7 +27,7 @@ class live_trader(object):
                 learner,
                 Qlearner,
                 symbol = 'AAPL', 
-                order_size = 100,               
+                order_size = 60,               
                 ttc = 9999):
         BASE_URL = "https://paper-api.alpaca.markets"
         ALPACA_API_KEY = "PKVH1SZ416UXYP2WMQDC"
@@ -43,93 +47,22 @@ class live_trader(object):
    
 
     def consumer_thread(self):
-
-        conn = Stream(ALPACA_API_KEY,
-                    ALPACA_SECRET_KEY,
-                    base_url=URL('https://paper-api.alpaca.markets'),
-                    data_feed='iex')
         
-        async def handle_bar(bar):
-            print('bar', bar)
-            #if there are less than 20 bars, add the bar otherwise keep only the last 19 and add the newest
-            if (len(self.close_prices)< self.count_of_prices_to_retain):
-                self.close_prices.append(bar.close)
-            else:
-                index_to_retain = self.count_of_prices_to_retain -1
-                self.close_prices = (self.close_prices[-index_to_retain:])
-                #######################################################
-                #Get Q action
-                # print('get_Qaction prices: '.format(self.close_prices))
-                # print(self.close_prices)
-                # current_position = 0
-                # mapped_position = 2
-                # try:
-                #     current_position = int(self.api.get_position(symbol = self.symbol).qty)
-                # except tradeapi.rest.APIError:
-                #     print(tradeapi.rest.APIError)
-                #     current_position = 0
-                # print(current_position)
-                #query the learner to get the prices
-                # if current_position > 0 :
-                #     mapped_position = 1
-                # elif current_position < 0:
-                #     mapped_position =0
-                
-                
-                ####################################
-                #query live data 
-                # print('query for live data')
-        
-                # df =pd.DataFrame()
-                
-                # df[symbol] = prices
-                # df['SPY'] = spy_prices
-                # print(df)
-                # print('prices: {}'.format(prices))
-                # df = self.learner.calculate_discrete_state(symbol,prices_all = df,spy_prices = spy_prices)	
-                # discrete_indicators	= df['discrete_indicator']
-                # print('returned indicators {}'.format(discrete_indicators))	 
-                # action_dict = {0:-shares_to_trade
-                #                 ,1: shares_to_trade
-                #                 ,2:0}
-                # state = int(str(discrete_indicators[-1]) + str(current_position))
-                # print('state: {}'.format(state))
-                # action = self.Qlearner.querysetstate(s = state)
-                # print('action: {}'.format(action))
-                # position = action_dict[action]
-                
-                ####################################
-    
-            #update bars to add new list
-            
+        while(self.timeToClose>1):
+            df = yf.download(['AAPL','SPY'],period='1d', interval='1m',progress=False)
+            self.close_prices = df['Adj Close','AAPL']
+            self.SPY_prices = df['Adj Close','SPY']
+            self.execute_QAction()
 
-        async def handle_SPY(bar):
-            if (len(self.SPY_prices)< self.count_of_prices_to_retain):
-                self.SPY_prices.append(bar.close)
-            else:
-                index_to_retain = self.count_of_prices_to_retain -1
-                self.SPY_prices = self.SPY_prices[-index_to_retain:]
-                self.SPY_prices.append(bar.close)
 
-        # loop = asyncio.get_event_loop()
-        # loop.run_until_complete(self.run_forevs())
-        print('set up bars')
-        conn.subscribe_bars(handle_SPY,'SPY')
-        conn.subscribe_bars(handle_bar, self.symbol)
-        conn.run()
-        print(self.timeToClose)
 
-    async def run_forevs(self):
-        while(1):
-            print('running')
-            time.sleep(10)
-            print('still running')
+
 
     def execute_QAction(self):
 
         #Get the difference between current and target position
-        print('get_Qaction prices: '.format(self.close_prices))
-        print(self.close_prices)
+        #print('get_Qaction prices: '.format(self.close_prices))
+        #print(self.close_prices)
         current_position = 0
         mapped_position = 2
         try:
@@ -137,44 +70,83 @@ class live_trader(object):
         except tradeapi.rest.APIError:
             print(tradeapi.rest.APIError)
             current_position = 0
-        print(current_position)
+     
         #query the learner to get the prices
         if current_position > 0 :
             mapped_position = 1
         elif current_position < 0:
             mapped_position =0
 
-        target_position = self.query_for_live_data(prices = self.close_prices,
+        target_position = self.learner.query_for_live_data(prices = self.close_prices,
                                                  spy_prices = self.SPY_prices,
                                                  order_size = self.order_size,
                                                  symbol = self.symbol,
                                                  current_position = mapped_position
                                                  )
         
-        print('target_position: {}'.format(target_position))
-        difference_between_target = target_position - current_position
-        transation_quantity = abs(difference_between_target)
+        #print('target_position: {}'.format(target_position))
+        difference_between_target = int(target_position - current_position)
+        switching_long_short = (target_position*current_position) <0
+   
+        transaction_quantity = abs(difference_between_target)
+        limit = self.close_prices[-1]
         #if we are not at our position cancel existing trades and make a trade to achieve desired position
         if difference_between_target != 0:
             if self.is_EOD():
                 self.close_all_positions_at_eod()
             else:
-                print('submitting order for : {}'.format(difference_between_target))
-            #create a new order
-                order_type = "sell" if difference_between_target < 0 else 'buy'
-                self.api.submit_order(
+                #if we are switching between long and short positions we must first clear our position. because alpaca friggin blow
+                if switching_long_short:
+                    while current_position != 0:
+                        try:
+                            current_position = int(self.api.get_position(symbol = self.symbol).qty)
+                        except tradeapi.rest.APIError:
+                            print(tradeapi.rest.APIError)
+                            current_position = 0
+                        difference_between_target = 0 - current_position
+                     
+
+
+            print('submitting order for : {}'.format(difference_between_target))
+            print('limit price : {}'.format(float(str(round(limit, 2)))))
+            difference_between_target = int(target_position - current_position)
+            transaction_quantity = abs(difference_between_target)
+        #create a new order
+            order_type = "sell" if difference_between_target < 0 else 'buy'
+            self.api.submit_order(
                     symbol=self.symbol,
-                    qty=transation_quantity,
+                    qty=transaction_quantity,
                     side=order_type,
                     type='limit',
                     time_in_force='ioc',
-                    limit_price=self.close_prices[-1]
+                    limit_price=float(str(round(limit, 2)))
+                    )
+
+           
+    def zero_out_before_position(self,limit,difference_between_target=0,
+                                    ):
+   
+        order_type = "sell" if difference_between_target < 0 else 'buy'
+        print('submitting order for : {}'.format(difference_between_target))
+        transaction_quantity = abs(difference_between_target)
+        self.api.submit_order(
+            symbol=self.symbol,
+            qty=transaction_quantity,
+            side=order_type,
+            type='limit',
+            time_in_force='ioc',
+            limit_price=float(str(round(limit, 2)))
             )
+        
+         
+            
+
+
     def is_EOD(self):
         minutes_before_close = 5
         clock = self.api.get_clock()
-        closingTime = clock.next_close.replace(tzinfo=datetime.timezone.utc).timestamp()
-        currTime = clock.timestamp.replace(tzinfo=datetime.timezone.utc).timestamp()
+        closingTime = clock.next_close.replace(tzinfo=timezone.utc).timestamp()
+        currTime = clock.timestamp.replace(tzinfo=timezone.utc).timestamp()
         self.timeToClose = closingTime - currTime
         return self.timeToClose < (60 * minutes_before_close)
     def close_all_positions_at_eod(self):
@@ -196,38 +168,7 @@ class live_trader(object):
 
 
 
-
-    def query_for_live_data(self,prices,spy_prices, order_size = 50,symbol = 'AAPL',
-                                current_position = 2):
-        shares_to_trade = order_size
-
-        #As standard encoding for the Q learner, we use:
-        # 0 to denote a short position
-        # 1 to denote long position
-        # 2 to denote no position
-
-        print('query for live data')
         
-        df =pd.DataFrame()
-        
-        df[symbol] = prices
-        df['SPY'] = spy_prices
-        print(df)
-        print('prices: {}'.format(prices))
-        df = self.learner.calculate_discrete_state(symbol,prices_all = df,spy_prices = spy_prices)	
-        discrete_indicators	= df['discrete_indicator']
-        print('returned indicators {}'.format(discrete_indicators))	 
-        action_dict = {0:-shares_to_trade
-                        ,1: shares_to_trade
-                        ,2:0}
-        print('curr pos:' + str(current_position))
-        state = '999'
-        print('state: {}'.format(state))
-        action = 2
-        #action = self.Qlearner.querysetstate(s = state)
-        print('action: {}'.format(action))
-        position = action_dict[action]
-        return position        
     def get_and_clean_data(starttime = (curr_datetime - timedelta(days=3)).isoformat(),endtime = (curr_datetime-timedelta(days=1)).isoformat(), symbol = 'AAPL'):
         #get data from Alpaca API
 

@@ -8,7 +8,7 @@ import threading
 import time
 import logging
 import sys
-logging.basicConfig(filename='app_logs.log',
+logging.basicConfig(filename='/home/ec2-user/app_logs.log',
          format='%(asctime)s %(message)s', 
          level=logging.INFO)
 # API Info for fetching data, portfolio, etc. from Alpaca
@@ -101,14 +101,35 @@ def run_awaitMarketOpen():
     tAMO.start()
     tAMO.join()
     print("Market opened.")
+def prev_weekday(adate):
+    adate -= timedelta(days=1)
+    while adate.weekday() > 4: # Mon-Fri are 0-4
+        adate -= timedelta(days=1)
+    return adate
 if __name__ == '__main__':
     symbol = 'AAPL'
     if len(sys.argv)>1:
         symbol = sys.argv[1]
 
-    #run_awaitMarketOpen()
+
+    # training_sd=(curr_datetime- timedelta(days=9)).isoformat()
+    # training_ed = (curr_datetime- timedelta(days=8)).isoformat(),
+    # testing_sd =(curr_datetime- timedelta(days=8)).isoformat(),
+    # testing_ed = (curr_datetime- timedelta(days =7)).isoformat(),
+
+    training_sd=prev_weekday(curr_datetime).isoformat()
+    training_ed = (curr_datetime- timedelta(minutes=15)).isoformat()
+    testing_sd =prev_weekday(curr_datetime).isoformat()
+    testing_ed = (curr_datetime- timedelta(minutes=15)).isoformat()
+    run_awaitMarketOpen()
     print('train learner')
-    testval, learner = train_test_strategy_learner(symbol=symbol)
+    testval, learner = train_test_strategy_learner(symbol=symbol,
+                                                training_sd=training_sd,
+                                                training_ed=training_ed,
+                                                testing_sd=testing_sd,
+                                                testing_ed=testing_ed
+                                                )
+    print('running_live')
     trader = live_trader.live_trader(learner=learner,
     Qlearner = learner.learner, symbol = symbol)
     trader.consumer_thread()

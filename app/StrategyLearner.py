@@ -66,7 +66,7 @@ class StrategyLearner(object):
         self.commission = commission
         self.learner = QLearner(num_states = 10000, num_actions = 3)  	
         self.Marketsimulator = marketsimulator
-        self.train_time = 30
+        self.train_time = 90
         #not currently using saved bins
         self.SPY_BINS =[] 
         self.STOC_BINS = []
@@ -126,7 +126,7 @@ class StrategyLearner(object):
         
         discrete_indicators = discrete_indicators.astype(float).astype(int)
         df['discrete_indicator'] = discrete_indicators
-        print(df)
+
         return df	  			  		 			     			  	 
   		  	   		  
 
@@ -213,24 +213,22 @@ class StrategyLearner(object):
         # 1 to denote long position
         # 2 to denote no position
 
-        print('query for live data')
+        #print('query for live data')
         
         df =pd.DataFrame()
         
         df[symbol] = prices
         df['SPY'] = spy_prices
-        print(df)
-        print('prices: {}'.format(prices))
         df = self.calculate_discrete_state(symbol,prices_all = df,spy_prices = spy_prices)	
         discrete_indicators	= df['discrete_indicator']
-        print('returned indicators {}'.format(discrete_indicators))	 
+
         action_dict = {0:-shares_to_trade
                         ,1: shares_to_trade
                         ,2:0}
         state = int(str(discrete_indicators[-1]) + str(current_position))
-        print('state: {}'.format(state))
+
         action = self.learner.querysetstate(s = state)
-        print('action: {}'.format(action))
+        #print('action: {}'.format(action))
         position = action_dict[action]
         #df['position'] = discrete_indicators.apply(self.learner.querysetstate)
         #df['position'] = df['position'].map(action_dict)
