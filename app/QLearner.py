@@ -29,7 +29,8 @@ GT ID: 903548572 (replace with your GT ID)
   		  	   		  	  			  		 			     			  	 
 import random as rand  		  	   		  	  			  		 			     			  	 
   		  	   		  	  			  		 			     			  	 
-import numpy as np  		  	   		  	  			  		 			     			  	 
+import numpy as np
+from NeuralNetwork import DQNLearner	  	  			  		 			     			  	 
   		  	   		  	  			  		 			     			  	 
   		  	   		  	  			  		 			     			  	 
 class QLearner(object):  		  	   		  	  			  		 			     			  	 
@@ -55,8 +56,8 @@ class QLearner(object):
     """  		  	   		  	  			  		 			     			  	 
     def __init__(  		  	   		  	  			  		 			     			  	 
         self,  		  	   		  	  			  		 			     			  	 
-        num_states=100,  		  	   		  	  			  		 			     			  	 
-        num_actions=4,  		  	   		  	  			  		 			     			  	 
+        num_states=100,		  	   		  	  			  		 			     			  	 
+        num_actions=3,  		  	   		  	  			  		 			     			  	 
         alpha=0.2,  		  	   		  	  			  		 			     			  	 
         gamma=0.9,  		  	   		  	  			  		 			     			  	 
         rar=0.5,  		  	   		  	  			  		 			     			  	 
@@ -69,7 +70,7 @@ class QLearner(object):
         """  		  	   		  	  			  		 			     			  	 
         self.verbose = verbose  		  	   		  	  			  		 			     			  	 
         self.num_actions = num_actions  		  	   		  	  			  		 			     			  	 
-        self.s = 0  		  	   		  	  			  		 			     			  	 
+        self.s = np.zeros(4) 		  	   		  	  			  		 			     			  	 
         self.a = 0
         self.Q = [[0 for a in range(num_actions)] for s in range(num_states)]
         self.alpha =alpha
@@ -78,6 +79,8 @@ class QLearner(object):
         self.dyna = dyna
         self.radr = radr
         self.T = {}
+        self.NeuralNet = DQNLearner()
+        self.num_indicators = 4
         # self.T = [[[0 for s_prime in range(num_states)] for a in range(num_actions)] for s in range(num_states)]
         # self.Tc = [[[0.00001 for s_prime in range(num_states)] for a in range(num_actions)] for s in range(num_states)]
           		  	   		  	  			  		 			     			  	 
@@ -92,8 +95,14 @@ class QLearner(object):
         :rtype: int  		  	   		  	  			  		 			     			  	 
         """  		  	   		  	  			  		 			     			  	 
         self.s = s
-        #print('q learner state: {}'.format(s))
-        action = self.Q[self.s].index(max(self.Q[self.s]))
+        
+        
+        
+        predictions = self.NeuralNet.predict(self.s)
+        action = np.argmax(predictions[0])
+        print('action: {}'.format(action))
+        
+        return action
         
         
         
@@ -118,61 +127,39 @@ class QLearner(object):
         :return: The selected action  		  	   		  	  			  		 			     			  	 
         :rtype: int  		  	   		  	  			  		 			     			  	 
         """
-        # update transition table for Dyna
-        self.T[(self.s,self.a,)] = (s_prime,r)
-     
+        
+        #self.NeuralNet.update(s_prime)
         #Determine Action
-        action = self.Q[s_prime].index(max(self.Q[s_prime]))
+        #action = self.Q[s_prime].index(max(self.Q[s_prime]))
+        New_NN_Prediction = self.NeuralNet.predict(s_prime)[0]
 
-        #Dyna
-        Tlength = len(self.T.keys()) 
-        for i in range(self.dyna):
-            
-            # print('visited states{}'.format(visited_states))
-            # print('T: {}'.format(self.T))
-            if len(self.T.keys()) > 0:
-
-                #sample s,a from existing transitions
-                halucinogen = rand.choice(list(self.T.keys()))
-                #print('halucinogen: {}'.format(halucinogen))
-                halucinated_s = halucinogen[0]
-                halucinated_a = halucinogen[1]
-                # print('Q of s{}'.format(self.Q[halucinated_s]))
-                # print('max Q of s{}'.format(max(self.Q[halucinated_s])))
-    
-                
-
-
-
-                halucinated_s_prime = self.T[(halucinated_s,halucinated_a)][0]
-                #print(s_prime)
-                halucunated_r = self.T[(halucinated_s,halucinated_a)][1]
-                    
-                #update table
-                currentQ = self.Q[halucinated_s][halucinated_a]
-                laterQ = self.gamma * (max(self.Q[halucinated_s_prime]))
-                qprime = ((1-self.alpha )*(currentQ)) + (self.alpha * (halucunated_r + laterQ))
-                self.Q[halucinated_s][halucinated_a] =qprime
-
-
-                
+        #Qlearner predict 
+        action = np.argmax(New_NN_Prediction)
 
 
 
 
-        #update table
-        currentQ = self.Q[self.s][self.a]
-        laterQ = self.gamma * (max(self.Q[s_prime]))
-        qprime = ((1-self.alpha )*(currentQ)) + (self.alpha * (r + laterQ))
-        self.Q[self.s][self.a] =qprime
+        #update table with 
+        #currentQ = self.Q[self.s][self.a]
+        Current_NN_Prediction =self.NeuralNet.predict(self.s,)[0]
+        currentQ = Current_NN_Prediction[self.a]
+        
+        #calculate the new q value for s and reward r
+        laterQ = self.gamma * (max(New_NN_Prediction))
+        #qprime = ((1-self.alpha )*(currentQ)) + (self.alpha * (r + laterQ))
+        qprime = r + laterQ
+
+        #update the neural network for state s reward r
+        Current_NN_Prediction[self.a] = qprime
+        self.NeuralNet.update(Current_NN_Prediction,state = self.s)
+        #self.Q[self.s][self.a] =qprime
+        print('current nn output: {}'.format(Current_NN_Prediction))
         
 
     
 
         		  	   		  	  			  		 			     			  	 
-        if self.verbose:
-            print('possible actions: {}'.format(self.Q[self.s]))  		  	   		  	  			  		 			     			  	 
-            print(f"s = {s_prime}, a = {action}, r={r}")  
+        
         if rand.random()  < self.rar:  
             action = rand.randint(0, self.num_actions - 1)
         self.rar = self.rar * self.radr 

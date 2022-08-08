@@ -136,9 +136,9 @@ class marketsim(object):
 
         #print(TRADES_DF)
         HOLDINGS_DF['cash'] = HOLDINGS_DF['cash'] + TRADES_DF['cash']
-        if debug:
-            print('HOLDINGS_DF: {}'.format(HOLDINGS_DF))
-            print('TRADES_DF: {}'.format(TRADES_DF))
+        # if debug:
+        #     print('HOLDINGS_DF: {}'.format(HOLDINGS_DF))
+        #     print('TRADES_DF: {}'.format(TRADES_DF))
 
         #print(HOLDINGS_DF)
         
@@ -152,8 +152,8 @@ class marketsim(object):
         #print(prices)
         VALUES_DF = prices * HOLDINGS_DF
         
-        if debug:
-            print('VALUES_DF: {}'.format(VALUES_DF))
+        # if debug:
+        #     print('VALUES_DF: {}'.format(VALUES_DF))
         
         portvals = VALUES_DF.sum(axis = 1)
         #print(portvals)

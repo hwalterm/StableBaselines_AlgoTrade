@@ -83,13 +83,16 @@ class live_trader(object):
                                                  symbol = self.symbol,
                                                  current_position = mapped_position
                                                  )
+
+        #print('Target: {}'.format(target_position))
         
-        #print('target_position: {}'.format(target_position))
+        print('target_position: {}'.format(target_position))
         difference_between_target = int(target_position - current_position)
         switching_long_short = (target_position*current_position) <0
    
         transaction_quantity = abs(difference_between_target)
-        limit = self.close_prices[-1]
+        #print(self.close_prices[-10:])
+        limit = self.close_prices.fillna(method='ffill')[ -1]
         #if we are not at our position cancel existing trades and make a trade to achieve desired position
         if difference_between_target != 0:
             if self.is_EOD():
@@ -97,37 +100,42 @@ class live_trader(object):
             else:
                 #if we are switching between long and short positions we must first clear our position. because alpaca friggin blow
                 if switching_long_short:
-                    while current_position != 0:
-                        try:
-                            current_position = int(self.api.get_position(symbol = self.symbol).qty)
-                        except tradeapi.rest.APIError:
-                            print(tradeapi.rest.APIError)
-                            current_position = 0
-                        difference_between_target = 0 - current_position
-                     
-
-
-            print('submitting order for : {}'.format(difference_between_target))
-            print('limit price : {}'.format(float(str(round(limit, 2)))))
-            difference_between_target = int(target_position - current_position)
-            transaction_quantity = abs(difference_between_target)
-        #create a new order
-            order_type = "sell" if difference_between_target < 0 else 'buy'
-            self.api.submit_order(
-                    symbol=self.symbol,
-                    qty=transaction_quantity,
-                    side=order_type,
-                    type='limit',
-                    time_in_force='ioc',
-                    limit_price=float(str(round(limit, 2)))
-                    )
+                    
+                    try:
+                        current_position = int(self.api.get_position(symbol = self.symbol).qty)
+                    except tradeapi.rest.APIError:
+                        print(tradeapi.rest.APIError)
+                        current_position = 0
+                    difference_between_target = 0 - current_position
+                    thread_zero_out = threading.Thread(target=self.zero_out_before_position,
+                    args=[limit,difference_between_target])
+                    thread_zero_out.start()
+                    thread_zero_out.join()
+                else:
+                    print('submitting order for : {}'.format(difference_between_target))
+                    print('Raw limit price: {}'.format(limit))
+                    print('limit price : {}'.format(float(str(round(limit, 2)))))
+                    difference_between_target = int(target_position - current_position)
+                    transaction_quantity = abs(difference_between_target)
+                    #create a new order
+                    order_type = "sell" if difference_between_target < 0 else 'buy'
+                    self.api.submit_order(
+                            symbol=self.symbol,
+                            qty=transaction_quantity,
+                            side=order_type,
+                            type='limit',
+                            time_in_force='ioc',
+                            limit_price=float(str(round(limit, 2)))
+                            )
+                    #sleep for a second to wait for the order to either go through or cancel
+                    time.sleep(1)
 
            
     def zero_out_before_position(self,limit,difference_between_target=0,
                                     ):
    
         order_type = "sell" if difference_between_target < 0 else 'buy'
-        print('submitting order for : {}'.format(difference_between_target))
+        print('zero out position: submitting order for : {}'.format(difference_between_target))
         transaction_quantity = abs(difference_between_target)
         self.api.submit_order(
             symbol=self.symbol,
@@ -137,6 +145,7 @@ class live_trader(object):
             time_in_force='ioc',
             limit_price=float(str(round(limit, 2)))
             )
+        time.sleep(1)
         
          
             

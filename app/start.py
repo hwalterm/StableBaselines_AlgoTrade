@@ -8,22 +8,22 @@ import threading
 import time
 import logging
 import sys
-logging.basicConfig(filename='/home/ec2-user/app_logs.log',
+logging.basicConfig(filename='app_logs.log',
          format='%(asctime)s %(message)s', 
-         level=logging.INFO)
+         level=logging.INFO, filemode = 'w')
 # API Info for fetching data, portfolio, etc. from Alpaca
 print('start')
 pd.set_option('display.max_rows', 100)
 BASE_URL = "https://paper-api.alpaca.markets"
-ALPACA_API_KEY = "PKVH1SZ416UXYP2WMQDC"
-ALPACA_SECRET_KEY = "RSuMJdSnBkHBpSxpWOiipyjTWOsqwgiPmBJYse3j"
+ALPACA_API_KEY = "PKY5G9B86FNQEYQARRFK"
+ALPACA_SECRET_KEY = "kYcBaE4p2H1Itcwnr9VIxN3ixNyd5Jizd3kVtOfR"
 curr_datetime = datetime.now(timezone.utc)
 api = tradeapi.REST(key_id=ALPACA_API_KEY, secret_key=ALPACA_SECRET_KEY, 
                     base_url=BASE_URL, api_version='v2')
 def get_and_clean_data(starttime = (curr_datetime - timedelta(days=3)).isoformat(),endtime = (curr_datetime-timedelta(days=1)).isoformat(), symbol = 'AAPL'):
     #get data from Alpaca API
-
-    DATA = api.get_bars(symbol = symbol, timeframe = '1Min',start = starttime, end = endtime)
+    
+    DATA = api.get_bars(symbol = symbol, timeframe = tradeapi.TimeFrame.Minute,start = starttime, end = endtime)
     DATA = DATA.df
     DATA[symbol] = DATA.close
     return pd.DataFrame(DATA[symbol])
@@ -95,12 +95,14 @@ def awaitMarketOpen():
       print(str(timeToOpen) + " minutes til market open.")
       time.sleep(60)
       isOpen = api.get_clock().is_open
+  
 def run_awaitMarketOpen():
     print("Waiting for market to open...")
     tAMO = threading.Thread(target=awaitMarketOpen)
     tAMO.start()
     tAMO.join()
-    print("Market opened.")
+    print("Market opened")
+    
 def prev_weekday(adate):
     adate -= timedelta(days=1)
     while adate.weekday() > 4: # Mon-Fri are 0-4
@@ -112,16 +114,16 @@ if __name__ == '__main__':
         symbol = sys.argv[1]
 
 
-    # training_sd=(curr_datetime- timedelta(days=9)).isoformat()
-    # training_ed = (curr_datetime- timedelta(days=8)).isoformat(),
-    # testing_sd =(curr_datetime- timedelta(days=8)).isoformat(),
-    # testing_ed = (curr_datetime- timedelta(days =7)).isoformat(),
+    # training_sd=(curr_datetime- timedelta(days=4)).isoformat()
+    # training_ed = (curr_datetime- timedelta(days=3)).isoformat(),
+    # testing_sd =(curr_datetime- timedelta(days=1)).isoformat(),
+    # testing_ed = (curr_datetime- timedelta(minutes =15)).isoformat(),
 
     training_sd=prev_weekday(curr_datetime).isoformat()
     training_ed = (curr_datetime- timedelta(minutes=15)).isoformat()
     testing_sd =prev_weekday(curr_datetime).isoformat()
     testing_ed = (curr_datetime- timedelta(minutes=15)).isoformat()
-    run_awaitMarketOpen()
+    #run_awaitMarketOpen()
     print('train learner')
     testval, learner = train_test_strategy_learner(symbol=symbol,
                                                 training_sd=training_sd,
@@ -129,7 +131,11 @@ if __name__ == '__main__':
                                                 testing_sd=testing_sd,
                                                 testing_ed=testing_ed
                                                 )
+    
+    print('wait 8 minutes for non nan indicators')
+    time.sleep(480)
     print('running_live')
+    
     trader = live_trader.live_trader(learner=learner,
     Qlearner = learner.learner, symbol = symbol)
     trader.consumer_thread()

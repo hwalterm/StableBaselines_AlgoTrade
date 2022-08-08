@@ -103,31 +103,16 @@ class StrategyLearner(object):
         df.fillna(method = 'ffill', inplace=True)
         df.fillna(method = 'bfill', inplace =True)
         
-        discretize_indicators_SPY,SPY_bins = pd.cut(df['SPY_Ratio'],bins = 10,labels=False, retbins=True,)
-        self.SPY_BINS = SPY_bins
-        discretize_indicators_SPY = discretize_indicators_SPY.astype(str)
-        
-        discretize_indicators_sma,sma_bins = pd.cut(df['sma'],bins = 10,labels=False, retbins=True,)
-        discretize_indicators_sma = discretize_indicators_sma.astype(str)
-        
 
-        discretize_indicators_stoc,stoc_bins = pd.cut(df['stochasticos'],bins = 10,labels=False, retbins=True,)
-        self.STOC_BINS = stoc_bins
-        discretize_indicators_stoc= discretize_indicators_stoc.astype(str)
-
-        discretize_indicators_bol,bol_bins = pd.cut(df['bollinger'],bins = 10,labels=False, retbins=True,)
-        self.BOL_BINS = bol_bins
-        discretize_indicators_bol = discretize_indicators_sma.astype(str) 
 
 
         #discrete_indicators = discretize_indicators_sma + (discretize_indicators_stoc) + (discretize_indicators_bol)
         
-        discrete_indicators = discretize_indicators_stoc + discretize_indicators_bol + discretize_indicators_SPY
+        states = df[['sma','stochasticos','SPY_Ratio']]
         
-        discrete_indicators = discrete_indicators.astype(float).astype(int)
-        df['discrete_indicator'] = discrete_indicators
 
-        return df	  			  		 			     			  	 
+
+        return states		     			  	 
   		  	   		  
 
       		  	   		  	  			  		 			     			  	 
@@ -141,19 +126,24 @@ class StrategyLearner(object):
     ):  
         prices_all = self.Marketsimulator.PRICES
         spy_prices = self.Marketsimulator.SPY_PRICES		  	   		  	  			  		 			     			  	 
-        df = self.calculate_discrete_state(symbol,
+        states = self.calculate_discrete_state(symbol,
                 prices_all=prices_all,spy_prices=spy_prices)	
-        discrete_indicators	= df['discrete_indicator']
-        discrete_indicators.index.values.astype(float)
-        first_index = discrete_indicators.first_valid_index()
-        index_time_interval = discrete_indicators.first_valid_index()			  		 			     			  	 
+        
+        
+        first_index = states.first_valid_index()
+    		  		 			     			  	 
         # if self.verbose:  		  	   		  	  			  		 			     			  	 
         #     print(prices) 
     
         #print(discrete_indicators)
         #set initial state
-        self.a = self.learner.querysetstate(discrete_indicators[0])
-        df['position'] = 0
+        states['position'] = 0
+        first_row = states.iloc[0].fillna(0).to_numpy()
+        
+        
+        print(first_row.shape)
+        self.a = 0
+        
   
 
         shares_to_trade = 60
@@ -174,26 +164,33 @@ class StrategyLearner(object):
         }
         t_end = time.time() +self.train_time
         previous_index = None
+        previous_action = None
+
+        # Iterate through rows to train learner
         while (time.time()< t_end):
             previous_r = r
         
-            for index,value in discrete_indicators.iteritems():
+            for index,state in states.iterrows():
                 if index >first_index:
-        
-                    previous_action = reverse_action_dict[df['position'][previous_index]]
-                    state = int(str(value) + str(previous_action))
+                    #if set current position to previous position
+                    state['position'] = previous_position
+                    #query what action we should take for the current position
+                    action = self.learner.query(s_prime = state,r =r )
                 else:
-                    state = int(str(value) + str(2))
-                action = self.learner.query(s_prime = state,r =r )
+                    
+                    action = self.learner.querysetstate(np.array(state))
          
-                position = action_dict[action]
-                df['position'][index] = position
-                r = self.compute_reward(holdings=df['position'])
+                new_position = action_dict[action]
+                print('new position: {}'.format(new_position))
+                #set current position to the new position and compute reward for the action
+                states['position'][index] = new_position
+                r = self.compute_reward(holdings=states['position'])
                 #print(r)
                 #transaction costs
-                impact_amount = (df['next_price'][index] * position) * self.impact
-                r = r - (self.commission + abs(impact_amount))
+                # impact_amount = (df['next_price'][index] * position) * self.impact
+                # r = r - (self.commission + abs(impact_amount))
                 previous_index = index
+                previous_position= new_position
                 
 
 
@@ -260,17 +257,17 @@ class StrategyLearner(object):
         start = time.process_time()
         prices_all = self.Marketsimulator.PRICES
         spy_prices = self.Marketsimulator.SPY_PRICES		  	   		  	  			  		 			     			  	 
-        df = self.calculate_discrete_state(symbol,
+        states = self.calculate_discrete_state(symbol,
                 prices_all=prices_all,spy_prices=spy_prices,
                 spy_bins = self.SPY_BINS,
                 stoc_bins = self.STOC_BINS,
                 bol_bins =self.BOL_BINS 	  			  		 			     			  			     			  	 
 )	
-        discrete_indicators	= df['discrete_indicator']	 
+        
         start = time.process_time()
-        df['position'] = 0
+        states['position'] = 0
         #discrete_indicators.index.values.astype(float)
-        first_index = discrete_indicators.first_valid_index()
+        first_index = states.first_valid_index()
         shares_to_trade = 60
         action_dict = {0:-shares_to_trade
                         ,1: shares_to_trade
@@ -279,21 +276,25 @@ class StrategyLearner(object):
                                 shares_to_trade:1,
                                 0:2
         }
-        previous_index=0
+        previous_index=None
+        previous_action = None
+        previous_position = None
   
-        for index,value in discrete_indicators.iteritems():
+        for index,state in states.iterrows():
             if index >first_index:
                 #print(str(df['position'][previous_index]))
-                previous_action = reverse_action_dict[df['position'][previous_index]]
-                state = int(str(value) + str(previous_action))
-            else:
-                state = int(str(value) + str(2))
+                
+                state['position'] = previous_position
+            
                 
             action = self.learner.querysetstate(s = state)
+    
          
             position = action_dict[action]
-            df['position'][index] = position
+            states['position'][index] = position
             previous_index = index
+            previous_action = action
+            previous_position =position
 
        
   
@@ -304,7 +305,9 @@ class StrategyLearner(object):
         #     action = self.learner.querysetstate(s = value)
         #     position = action_dict[action]
         #     df['position'][index] = position
-        df['previous_position'] = df['position'].shift()
+        df = pd.DataFrame()
+        df['position'] = states['position']
+        df['previous_position'] =df['position'].shift()
         df['previous_position'][0] = 0
         df['orders'] = df['position'] - df['previous_position']
 
@@ -330,11 +333,6 @@ class StrategyLearner(object):
 
     		  	  			  		 			     			  	 
   		  	   		  	  			  		 			     			  	 
-    def author(self):                                                                                              
-        """                                                                                              
-        :return: The GT username of the student                                                                                              
-        :rtype: str                                                                                              
-        """                                                                                              
-        return "halterman3"   		  	   		  	  			  		 			     			  	 
+  		  	   		  	  			  		 			     			  	 
 if __name__ == "__main__":  		  	   		  	  			  		 			     			  	 
     print("One does not simply think up a strategy")  		  	   		  	  			  		 			     			  	 
