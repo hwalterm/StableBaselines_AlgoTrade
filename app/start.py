@@ -8,6 +8,7 @@ import threading
 import time
 import logging
 import sys
+import train_gym
 logging.basicConfig(filename='app_logs.log',
          format='%(asctime)s %(message)s', 
          level=logging.INFO, filemode = 'w')

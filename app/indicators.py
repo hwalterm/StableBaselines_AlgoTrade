@@ -1,7 +1,13 @@
+#
+# Created on Wed Aug 10 2022
+#
+# Copyright (c) 2022 H. Alterman
+#
 
 import pandas as pd
 import datetime as dt 
 import numpy as np
+
 def run_bollinger(price_df,symbol):
     df = price_df
     df[symbol+'_SMA'] = df.iloc[:,0].rolling(window=10).mean()

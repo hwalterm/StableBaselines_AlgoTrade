@@ -1,3 +1,9 @@
+#
+# Created on Wed Aug 10 2022
+#
+# Copyright (c) 2022 H. Alterman
+#
+
 from math import inf
 import gym
 import numpy as np
@@ -21,7 +27,7 @@ class StockTradeEnv(gym.Env):
         price_df: pd.DataFrame = pd.DataFrame(data={'AAPL':[0]}),
         indicator_df: pd.DataFrame = pd.DataFrame(data={'position':[0],'indicator1':[0]}),
         symbol = 'AAPL',
-        max_trade = 60):
+        max_trade = 60,transaction_cost_percent = .000001):
         self.symbol =symbol
         self.position = {'position':0,'price':0}
         self.price_df = price_df
@@ -34,24 +40,35 @@ class StockTradeEnv(gym.Env):
                                             dtype = float)
         self.marketsimulator = marketsimulator
         self.state = indicator_df.iloc[0,:]
+        self.transaction_cost_percent = transaction_cost_percent
 
     def step(self, action):
         number_of_observations = len(self.price_df.index)
+        last_index = number_of_observations -1
         
-
-
         
-
-        #action is an int between 0 and action space -1 ([0,2]) so we subtract 1 so it will be -1,0 or 1
-        #depending on whether we should have a short position, no position or long position
-        target_position = (action-1) * self.max_trade
-        #amount to order will be the target position minus current position
-        order = target_position - self.position['position']
+        
         #get the current price and current time
-        print('step {} taking action {}, position {}, target position {}'.format(self.current_index, order,self.position['position'],target_position))
+        #print('step {} taking action {}, position {}, target position {}'.format(self.current_index, order,self.position['position'],target_position))
         current_datetime = self.price_df.index[self.current_index]
         current_price = self.price_df.loc[current_datetime,self.symbol]
-        #print('current position: {}'.format(self.indicator_df.loc[current_datetime,'position']))
+        
+        #if it is the end of the data we will set our target position to zero. otherwise we will check our action
+        if self.current_index+1 >= last_index:
+            target_position = 0
+        else:
+            #if it is not the end of the data, but is the end of the day, also set to 0
+            next_datetime = self.price_df.index[self.current_index +1]
+            if current_datetime.date() < next_datetime.date():
+                target_position = 0
+            else:
+                #otherwise we will use learner action
+                #action is an int between 0 and action space -1 ([0,2]) so we subtract 1 so it will be -1,0 or 1
+                #depending on whether we should have a short position, no position or long position
+                target_position = (action-1) * self.max_trade
+
+        #amount to order will be the target position minus current position
+        order = target_position - self.position['position']
 
         #if we are closing a short position or a long position calculate the reward
         #closing a position means either we own negative shares and are buying, or own positive shares and are sellign
@@ -60,7 +77,7 @@ class StockTradeEnv(gym.Env):
             #reward will be equal to the new (price - old price) * shares that were traded
             #if we are closing a short position order will be positive. reward will be positive if price < old price
             #if we are closing a long position order will be negative. reward will be positive if price > old price
-            print('current price {}, position price {} '.format(current_price, self.position['price']))
+            #print('current price {}, position price {} '.format(current_price, self.position['price']))
             reward = (current_price - self.position['price']) * float(self.position['position']) *1.0
             if self.position['position'] == 0:
                 reward = 0
@@ -73,7 +90,13 @@ class StockTradeEnv(gym.Env):
         else:
             reward = 0
         
-        print('reward: {}'.format(reward))
+        transaction_cost = abs(order) * abs(current_price) * abs(self.transaction_cost_percent)
+        reward = reward - transaction_cost
+
+        # print('step {} taking action {}, position {}, target position {}'.format(self.current_index, order,self.position['position'],target_position))
+        # print('current datetime {}'.format(current_datetime))
+        
+        
         #if we have another observation go to next, otherwise go to first observation
         if self.current_index<number_of_observations-1:
             #print('current_index {} number of observation {}'.format(self.current_index, number_of_observations))
@@ -81,15 +104,17 @@ class StockTradeEnv(gym.Env):
         else:
             self.current_index = 0
         current_datetime = self.price_df.index[self.current_index]
+
+        
         #print('current_index {} number of observation {}'.format(self.current_index, number_of_observations))
-        #print('current datetime {}'.format(current_datetime))
+        
         #update the current state to reflect our new position
         self.indicator_df.loc[current_datetime,'position'] = float(order)
         #print('next position: {}'.format(self.indicator_df.loc[current_datetime,'position']))
         state = self.indicator_df.loc[current_datetime].to_numpy()
         done = False
         info = {}
-        #print('observation shape {} current state {}'.format(self.observation_shape,state))
+        #print('reward: {}'.format(reward))
         return state, reward, done, info
     
     def reset(self):
@@ -103,8 +128,6 @@ class StockTradeEnv(gym.Env):
      
         return state.to_numpy()
     
-    # def __setattr__(self, __name: str, __value: Any) -> None:
-    #     return super().__setattr__(__name, __value)
 
 
 #trader_env = StockTradeEnv(observation_shape=(5,))

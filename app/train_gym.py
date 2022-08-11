@@ -1,3 +1,9 @@
+#
+# Created on Wed Aug 10 2022
+#
+# Copyright (c) 2022 H. Alterman
+#
+
 from cgitb import reset
 import trader_env
 import indicators
@@ -7,29 +13,50 @@ from datetime import datetime,timezone, timedelta
 from setuptools import setup
 from stable_baselines3.common.env_checker import check_env
 from stable_baselines3 import PPO
+import logging
 
+
+interval = '1m'
 check_env(trader_env.StockTradeEnv())
-
 curr_datetime = datetime.now(timezone.utc)
-def get_and_clean_data(starttime = (curr_datetime - timedelta(days=10)).strftime('%Y-%m-%d'),
-    endtime = (curr_datetime-timedelta(days=3)).strftime('%Y-%m-%d'), symbol = 'AAPL'):
+
+
+def get_and_clean_data(starttime:str = (curr_datetime - timedelta(days=7)).strftime('%Y-%m-%d'),
+    endtime:str = (curr_datetime-timedelta(days=0)).strftime('%Y-%m-%d'), symbol = 'AAPL')->pd.DataFrame:
+    ####################################################
+    #retrieve prices data from yfinance for given symbol
+    #Expects: 
+    # 1.start and end dates as string format yyy-mm-dd
+    # 2.ticker symbol as string
+    ###################################################
     #get data from Alpaca API
     
     DATA = yf.download(symbol,
-     start=starttime, end=endtime,interval='1m',rounding = True)
+     start=starttime, end=endtime,interval=interval,rounding = True)
     DATA[symbol] = DATA.Close.fillna(method = 'ffill')   
     return pd.DataFrame(DATA[symbol])
-def get_SPY_data (starttime = (curr_datetime - timedelta(days=14)).strftime('%Y-%m-%d'),
-                    endtime = (curr_datetime-timedelta(days=3)).strftime('%Y-%m-%d')):
+def get_SPY_data (starttime = (curr_datetime - timedelta(days=7)).strftime('%Y-%m-%d'),
+                    endtime = (curr_datetime-timedelta(days=0)).strftime('%Y-%m-%d')):
+    ####################################################
+    #retrieve prices data from yfinance for given symbol
+    #Expects: 
+    # 1.start and end dates as string format yyy-mm-dd
+    ###################################################
 
     DATA = yf.download("SPY",
-     start=starttime, end=endtime,interval='1m',rounding = True)
+     start=starttime, end=endtime,interval=interval,rounding = True)
     DATA["SPY"] = DATA.Close.fillna(method = 'ffill')
     return DATA["SPY"]
 
-def calculate_indicators(prices,symbol,spy_prices):
+def calculate_indicators(prices:pd.DataFrame,symbol:str,spy_prices:pd.Series)->pd.DataFrame:
+    ####################################################
+    #calculate indicators for prices dataframe
+    #Expects: 
+    # 1.Prices dataframe with the [symbol] column containing close prices
+    # 2.the S&P500 close prices series in the spy_prices dataframe(for calculating spy ratio)
+    # 3.the ticker symbol
+    ###################################################
     df = prices
-    
     df['sma'] = indicators.run_SMA(prices,symbol=symbol)
     df['momentum'] = indicators.run_momentum(prices,symbol=symbol)
     df['stochasticos'] = indicators.run_stochasticos(prices,symbol=symbol)
@@ -40,11 +67,16 @@ def calculate_indicators(prices,symbol,spy_prices):
     df = df[['sma','momentum','stochasticos','SPY_Ratio','position']]
     df = df.fillna(0)
     return df
-def trainmodel(prices,indicators):
+def trainmodel(prices:pd.DataFrame,indicators:pd.DataFrame):
+    ####################################################
+    #Train model using PPO
+    ###################################################
     env = trader_env.StockTradeEnv(price_df=prices,indicator_df=indicators,observation_shape=(indicators.shape[1],))
-    model = PPO("MlpPolicy", env, verbose=1)
+    model = PPO("MlpPolicy", env, verbose=1,
+     #gamma = .9999,learning_rate=0.00001
+     )
     obs = env.reset()
-    model.learn(total_timesteps = 6000)
+    model.learn(total_timesteps = 90000)
     # for i in range(1000):
     #     action, _state = model.predict(obs, deterministic=True)
     #     obs, reward, done, info = env.step(action)
@@ -53,6 +85,14 @@ def trainmodel(prices,indicators):
     return model, env
 
 def testmodel(prices,indicators,env):
+    ####################################################
+    #Test model against test data Expects
+    #1. Prices dataframe 
+    #2. indicator dataframe
+    #3.Training environment. Should point to same environment that data was trained on
+    ###################################################
+
+    logging.info('testing')
     env = trader_env.StockTradeEnv(price_df=prices,indicator_df=indicators,observation_shape=(indicators.shape[1],))
     model = PPO.load("ppo_trader")
     #test using new prices and indicators
@@ -61,11 +101,13 @@ def testmodel(prices,indicators,env):
 
     obs = env.reset()
     reward_sum = 0
-    for i in range(len(prices.index)):
+    for i in range(len(prices.index)-1):
         action, _states = model.predict(obs)
+        if prices.index[i].date()<prices.index[i+1].date():
+            action = 1
         obs, rewards, dones, info = env.step(action)
         reward_sum += rewards
-        print('reward:{}   total reward:{}  '.format(rewards,reward_sum))
+    #     print('reward:{}   total reward:{}  '.format(rewards,reward_sum))
 
     print('total reward: {}'.format(reward_sum))
 
