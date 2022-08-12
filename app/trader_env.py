@@ -8,7 +8,7 @@ from math import inf
 import gym
 import numpy as np
 import pandas as pd
-print('testtest')
+#print('testtest')
 
 import marketsimcode
 

@@ -14,14 +14,22 @@ from setuptools import setup
 from stable_baselines3.common.env_checker import check_env
 from stable_baselines3 import PPO
 import logging
+import os
+import json
+from alpha_vantage.timeseries import TimeSeries
 
+dirname = os.path.dirname(__file__)
+
+with open(os.path.join(dirname,'alpaca_keys.json'), 'r') as f:
+  alpaca_keys = json.load(f)
+ALPHAV_KEY = alpaca_keys['ALPHA_V']
 
 interval = '1m'
 check_env(trader_env.StockTradeEnv())
 curr_datetime = datetime.now(timezone.utc)
 
 
-def get_and_clean_data(starttime:str = (curr_datetime - timedelta(days=7)).strftime('%Y-%m-%d'),
+def get_and_clean_data(starttime:str = (curr_datetime - timedelta(days=14)).strftime('%Y-%m-%d'),
     endtime:str = (curr_datetime-timedelta(days=0)).strftime('%Y-%m-%d'), symbol = 'AAPL')->pd.DataFrame:
     ####################################################
     #retrieve prices data from yfinance for given symbol
@@ -29,23 +37,32 @@ def get_and_clean_data(starttime:str = (curr_datetime - timedelta(days=7)).strft
     # 1.start and end dates as string format yyy-mm-dd
     # 2.ticker symbol as string
     ###################################################
-    #get data from Alpaca API
+    #get data from ALPHAV api
     
-    DATA = yf.download(symbol,
-     start=starttime, end=endtime,interval=interval,rounding = True)
-    DATA[symbol] = DATA.Close.fillna(method = 'ffill')   
+    # DATA = yf.download(symbol,
+    #  start=starttime, end=endtime,interval=interval,rounding = True)
+    
+    ts = TimeSeries(key=ALPHAV_KEY,output_format='pandas', indexing_type='date')
+    DATA,meta= ts.get_intraday(symbol = symbol,interval = '1min',outputsize='full')
+    DATA.rename({'4. close':'Close','date':'Datetime'}, axis =1, inplace = True)
+    DATA[symbol] = DATA.Close.fillna(method = 'ffill')  
+    
     return pd.DataFrame(DATA[symbol])
-def get_SPY_data (starttime = (curr_datetime - timedelta(days=7)).strftime('%Y-%m-%d'),
+def get_SPY_data (starttime = (curr_datetime - timedelta(days=14)).strftime('%Y-%m-%d'),
                     endtime = (curr_datetime-timedelta(days=0)).strftime('%Y-%m-%d')):
     ####################################################
     #retrieve prices data from yfinance for given symbol
     #Expects: 
     # 1.start and end dates as string format yyy-mm-dd
     ###################################################
+    ts = TimeSeries(key=ALPHAV_KEY,output_format='pandas', indexing_type='date')
+    DATA,meta= ts.get_intraday(symbol = "SPY",interval = '1min',outputsize='full')
+    DATA.rename({'4. close':'Close','date':'Datetime'}, axis =1, inplace = True)
+    DATA["SPY"] = DATA.Close.fillna(method = 'ffill')  
 
-    DATA = yf.download("SPY",
-     start=starttime, end=endtime,interval=interval,rounding = True)
-    DATA["SPY"] = DATA.Close.fillna(method = 'ffill')
+    # DATA = yf.download("SPY",
+    #  start=starttime, end=endtime,interval=interval,rounding = True)
+    # DATA["SPY"] = DATA.Close.fillna(method = 'ffill')
     return DATA["SPY"]
 
 def calculate_indicators(prices:pd.DataFrame,symbol:str,spy_prices:pd.Series)->pd.DataFrame:
@@ -122,10 +139,10 @@ if __name__ == '__main__':
     model, env = trainmodel(prices,indicators= ind_df)
 
     #Test
-    prices = get_and_clean_data(starttime = (curr_datetime - timedelta(days=3)).strftime('%Y-%m-%d'),
+    prices = get_and_clean_data(starttime = (curr_datetime - timedelta(days=1)).strftime('%Y-%m-%d'),
                                 endtime = (curr_datetime-timedelta(days=0)).strftime('%Y-%m-%d'), 
                                 symbol = 'AAPL')
-    spy = get_SPY_data (starttime = (curr_datetime - timedelta(days=3)).strftime('%Y-%m-%d'),
+    spy = get_SPY_data (starttime = (curr_datetime - timedelta(days=1)).strftime('%Y-%m-%d'),
                         endtime = (curr_datetime-timedelta(days=0)).strftime('%Y-%m-%d'))
     ind_df = calculate_indicators(prices = prices, symbol='AAPL',spy_prices = spy)
     testmodel(prices,indicators= ind_df, env = env)
