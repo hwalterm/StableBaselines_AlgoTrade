@@ -4,7 +4,7 @@
 This app uses the StableBaselines3 library to train and run live traiding using the alpaca environment. The app additionall uses the Alpha Vantage API and Yahoo Finance API to download historic and live data 
 
 ## Configure
-Before running the app you must create a json file to store your alpaca credentials. the file should have the following format
+Before running the app you must an 'alpaca_keys.json' file in the /app directory to store your alpaca credentials. the file should have the following format.
 ```
 {
  "BASE_URL" :"https://paper-api.alpaca.markets"
@@ -12,6 +12,7 @@ Before running the app you must create a json file to store your alpaca credenti
 ,"ALPACA_SECRET_KEY" :"[your alpaca api secret key]"
 ,"ALPHA_V":"[your alpha vantage key]"}
 ```
+save this file 
 
 ## Executing the application
 To execute the application you can install the required libraries in the app/requirements.txt file and running
