@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 #print('testtest')
 
-import marketsimcode
+
 
 #########################################################################################
 #the below environment expects:
@@ -23,7 +23,6 @@ class StockTradeEnv(gym.Env):
     def __init__(self,
         observation_shape =(2,), 
         action_space =3, 
-        marketsimulator:marketsimcode.marketsim = None,
         price_df: pd.DataFrame = pd.DataFrame(data={'AAPL':[0]}),
         indicator_df: pd.DataFrame = pd.DataFrame(data={'position':[0],'indicator1':[0]}),
         symbol = 'AAPL',
@@ -38,7 +37,6 @@ class StockTradeEnv(gym.Env):
         self.action_space = gym.spaces.Discrete(action_space)
         self.observation_space = gym.spaces.Box(low = -inf, high = inf,shape = observation_shape,
                                             dtype = float)
-        self.marketsimulator = marketsimulator
         self.state = indicator_df.iloc[0,:]
         self.transaction_cost_percent = transaction_cost_percent
 

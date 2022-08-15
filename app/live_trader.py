@@ -18,6 +18,7 @@ import yfinance as yf
 from decimal import *
 import os
 import sys
+import pytz
 from stable_baselines3.common.env_checker import check_env
 from stable_baselines3 import PPO
 
@@ -28,7 +29,7 @@ dirname = os.path.dirname(__file__)
 logging.basicConfig(filename='app_logs.log',
          format='%(asctime)s %(message)s', 
          level=logging.INFO, filemode = 'w') 
-logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))     
+#logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))     
 #Bar intervals for prices
 interval = '1m'
 
@@ -61,7 +62,8 @@ class live_trader(object):
                 order_size = 60,               
                 ttc = 9999):
 
-        self.curr_datetime = datetime.now(timezone.utc)
+        newYorkTz = pytz.timezone("America/New_York") 
+        self.curr_datetime = datetime.now(newYorkTz)
         self.api = tradeapi.REST(key_id=ALPACA_API_KEY, secret_key=ALPACA_SECRET_KEY, 
                             base_url=BASE_URL, api_version='v2')
         self.timeToClose = 9999
@@ -72,6 +74,12 @@ class live_trader(object):
 
         self.count_of_prices_to_retain = 10
         self.model = PPO.load("ppo_trader")
+        dirname = os.path.dirname(__file__)
+
+
+        logging.basicConfig(filename='{}_app_logs.log'.format(symbol),
+            format='%(asctime)s %(message)s', 
+            level=logging.INFO, filemode = 'w') 
 
     def get_interval_as_int(self,interval:str) -> int:
         #########################################################
@@ -116,7 +124,7 @@ class live_trader(object):
         action, _states = self.model.predict(obs)
         #action is int 0 through 2. subtract 1 so we have -1 through 1
         #multiply by order size for target position
-        target_position = (action-1) * self.order_size
+        target_position = ((action-1) * self.order_size) * -1
         
         return target_position
 
@@ -128,19 +136,24 @@ class live_trader(object):
         
         while(self.timeToClose>1):
             #download data from y finance
-            df = yf.download([self.symbol,'SPY'],period='1d', interval=interval,progress=False,rounding=True)
-            self.close_prices = pd.DataFrame()
-            self.close_prices[self.symbol] = df['Adj Close',self.symbol].fillna(method='ffill')
+            NewYorkTz = pytz.timezone("America/New_York") 
+            curr_datetime = datetime.now(NewYorkTz)
+            df = yf.download([self.symbol,'SPY'],start = curr_datetime - timedelta(minutes=30), end = curr_datetime, interval='1m',progress=False,rounding=True)
+            if len(df)< 5:
+                logging.warning('Not enough data in last 30 minutes to calculate indicators')
+            else:
+                self.close_prices = pd.DataFrame()
+                self.close_prices[self.symbol] = df['Adj Close',self.symbol].fillna(method='ffill')
 
-            
-            self.SPY_prices = df['Adj Close','SPY']
-            self.SPY_prices.fillna(method='ffill')
-            
-            #query learner and execute appropriate action
-            self.execute_QAction()
-            #depending on what interval we trained on are using we will wait at least half that time until querying the learner again
-            interval_in_seconds = self.get_interval_as_int(interval)
-            time.sleep(interval_in_seconds/2)
+                
+                self.SPY_prices = df['Adj Close','SPY']
+                self.SPY_prices.fillna(method='ffill')
+                
+                #query learner and execute appropriate action
+                self.execute_QAction()
+                #depending on what interval we trained on are using we will wait at least half that time until querying the learner again
+                interval_in_seconds = self.get_interval_as_int(interval)
+                time.sleep(interval_in_seconds/2)
 
 
 
@@ -156,15 +169,11 @@ class live_trader(object):
         logging.debug('get_Qaction prices: '.format(self.close_prices))
         logging.debug(self.close_prices)
         current_position = 0
-        mapped_position = 2
+        
         current_position = self.get_current_position()
   
      
-        #query the learner to get the prices
-        if current_position > 0 :
-            mapped_position = 1
-        elif current_position < 0:
-            mapped_position =0
+       
         logging.debug(self.close_prices)
         ind_df = self.calculate_indicators(prices = self.close_prices, 
                                            symbol=self.symbol,
@@ -174,7 +183,7 @@ class live_trader(object):
         obs = ind_df.loc[current_datetime].to_numpy()
         target_position = self.query_model(obs=obs,position = current_position)
 
-        logging.debug('Target: {}'.format(target_position))
+        logging.info('Target: {}'.format(target_position))
         
        
         difference_between_target = int(target_position - current_position)
@@ -218,7 +227,7 @@ class live_trader(object):
                     
                     #while the order isn't filled retry placing the order up to 30 times
                     while status.lower() != 'filled' and retries < max_retries:
-                        logging.debug('retry: {}'.format(retries))
+                        logging.info('retry: {}'.format(retries))
                         retries += 1
                         try:
                             #try to submit order catch any api error and print try zeroing out order and retry
@@ -274,6 +283,7 @@ class live_trader(object):
         retries = 0
         #try zeroing out three times before giving up
         while status.lower() != 'filled' and retries <3:
+            logging.info('retries: {}'.format(retries))
             retries +=1
             order = self.api.submit_order(
                 symbol=self.symbol,
@@ -284,10 +294,22 @@ class live_trader(object):
                 limit_price=float(str(round(limit, 2)))
                 )
             
+            
+            
+            if retries >= 3:
+                logging.info('limit order failed submitting market')
+                order = self.api.submit_order(
+                symbol=self.symbol,
+                qty=transaction_quantity,
+                side=order_type,
+                type='market',
+                )
             time.sleep(1)
             last_order_id = order.id
             order = self.api.get_order(last_order_id)
             status = order.status
+            logging.info('order status: {}'.format(order.status))
+
         
          
             

@@ -16,11 +16,8 @@ import sys
 import os
 import json
 
-#configure logs
-logging.basicConfig(filename='app_logs.log',
-         format='%(asctime)s %(message)s', 
-         level=logging.INFO, filemode = 'w')
-logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
+
+
 # API Info for fetching data, portfolio, etc. from Alpaca
 print('start')
 pd.set_option('display.max_rows', 100)
@@ -62,12 +59,12 @@ def train(symbol):
     ####################################################
     #creates thread to pause execution until market opens
     ###################################################
-    train_gym.get_and_clean_data(symbol=symbol)
-    prices = train_gym.get_and_clean_data()
+    
+    prices = train_gym.get_and_clean_data(symbol=symbol)
     spy = train_gym.get_SPY_data()
-    ind_df = train_gym.calculate_indicators(prices = prices, symbol='AAPL',spy_prices = spy)
+    ind_df = train_gym.calculate_indicators(prices = prices, symbol=symbol,spy_prices = spy)
     print(ind_df)
-    model, env = train_gym.trainmodel(prices,indicators= ind_df)
+    model, env = train_gym.trainmodel(prices=prices,indicators= ind_df,symbol=symbol)
     return model,env
 
 
@@ -75,7 +72,16 @@ if __name__ == '__main__':
     symbol = 'AAPL'
     if len(sys.argv)>1:
         symbol = sys.argv[1]
+    if len(sys.argv)>2:
+        try:
+            quantity = int(sys.argv[2])
+        except:
+            raise Exception('quantity must be an integer')
+    #configure logs
+    logging.basicConfig(filename='{}_app_logs.log'.format(symbol),
+         format='%(asctime)s %(message)s', 
+         level=logging.INFO, filemode = 'w')
     model,env = train(symbol)
     #run_awaitMarketOpen()
-    trader = live_trader.live_trader(symbol = symbol)
+    trader = live_trader.live_trader(symbol = symbol, order_size=quantity)
     trader.consumer_thread()

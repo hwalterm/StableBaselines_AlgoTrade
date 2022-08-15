@@ -30,7 +30,7 @@ curr_datetime = datetime.now(timezone.utc)
 
 
 def get_and_clean_data(starttime:str = (curr_datetime - timedelta(days=14)).strftime('%Y-%m-%d'),
-    endtime:str = (curr_datetime-timedelta(days=0)).strftime('%Y-%m-%d'), symbol = 'AAPL')->pd.DataFrame:
+    endtime:str = (curr_datetime-timedelta(days=0)).strftime('%Y-%m-%d'), symbol:str = 'AAPL')->pd.DataFrame:
     ####################################################
     #retrieve prices data from yfinance for given symbol
     #Expects: 
@@ -46,7 +46,7 @@ def get_and_clean_data(starttime:str = (curr_datetime - timedelta(days=14)).strf
     DATA,meta= ts.get_intraday(symbol = symbol,interval = '1min',outputsize='full')
     DATA.rename({'4. close':'Close','date':'Datetime'}, axis =1, inplace = True)
     DATA[symbol] = DATA.Close.fillna(method = 'ffill')  
-    
+    print(DATA)
     return pd.DataFrame(DATA[symbol])
 def get_SPY_data (starttime = (curr_datetime - timedelta(days=14)).strftime('%Y-%m-%d'),
                     endtime = (curr_datetime-timedelta(days=0)).strftime('%Y-%m-%d')):
@@ -83,14 +83,21 @@ def calculate_indicators(prices:pd.DataFrame,symbol:str,spy_prices:pd.Series)->p
     df['position'] = 0
     df = df[['sma','momentum','stochasticos','SPY_Ratio','position']]
     df = df.fillna(0)
+    # df.to_csv('indicators.csv')
+    # print('calc indicators')
     return df
-def trainmodel(prices:pd.DataFrame,indicators:pd.DataFrame):
+def trainmodel(prices:pd.DataFrame,indicators:pd.DataFrame,symbol:str):
     ####################################################
     #Train model using PPO
     ###################################################
-    env = trader_env.StockTradeEnv(price_df=prices,indicator_df=indicators,observation_shape=(indicators.shape[1],))
+    env = trader_env.StockTradeEnv(price_df=prices,
+        indicator_df=indicators,
+        symbol=symbol,
+        observation_shape=(indicators.shape[1],)
+        )
     model = PPO("MlpPolicy", env, verbose=1,
-     #gamma = .9999,learning_rate=0.00001
+    gamma = .999
+     # ,learning_rate=0.00001
      )
     obs = env.reset()
     model.learn(total_timesteps = 90000)
@@ -101,7 +108,7 @@ def trainmodel(prices:pd.DataFrame,indicators:pd.DataFrame):
     model.save("ppo_trader")
     return model, env
 
-def testmodel(prices,indicators,env):
+def testmodel(prices,indicators,env,symbol:str):
     ####################################################
     #Test model against test data Expects
     #1. Prices dataframe 
@@ -110,7 +117,10 @@ def testmodel(prices,indicators,env):
     ###################################################
 
     logging.info('testing')
-    env = trader_env.StockTradeEnv(price_df=prices,indicator_df=indicators,observation_shape=(indicators.shape[1],))
+    env = trader_env.StockTradeEnv(price_df=prices,
+                                    indicator_df=indicators,
+                                    symbol=symbol,
+                                    observation_shape=(indicators.shape[1],))
     model = PPO.load("ppo_trader")
     #test using new prices and indicators
     setattr(env,'price_df',prices)
