@@ -110,7 +110,7 @@ class live_trader(object):
 
     def get_current_position(self)->int:
         #########################################################
-        #query APO
+        #query Alpaca API
         #########################################################
         try:
             current_position = int(self.api.get_position(symbol = self.symbol).qty)
