@@ -124,7 +124,7 @@ class live_trader(object):
         action, _states = self.model.predict(obs)
         #action is int 0 through 2. subtract 1 so we have -1 through 1
         #multiply by order size for target position
-        target_position = ((action-1) * self.order_size) * -1
+        target_position = ((action-1) * self.order_size)
         
         return target_position
 
